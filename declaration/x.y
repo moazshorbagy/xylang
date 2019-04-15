@@ -10,7 +10,7 @@ int yyerror(char *);
 
 %%
 
-lang: lang decl | decl ;
+lang: lang decl | decl			{ printf("lang reduction\n"); };
 decl: type varlist ';'			{ printf("decl reduction\n"); };
 type: INT | FLOAT				{ printf("type reduction\n"); };
 varlist:
@@ -20,11 +20,14 @@ varlist:
 %%
 
 int yyerror(char *msg) {
-  fprintf(stderr, "%s\n", msg);
-  exit(1);
+	fprintf(stderr, "%s\n", msg);
+	exit(1);
 }
 
-int main(){
-  yyparse();
-  return 0;
+extern FILE *yyin;
+
+int main(int argc, char *argv[]) {
+	yyin = fopen(argv[1], "r");
+	yyparse();
+	return 0;
 }

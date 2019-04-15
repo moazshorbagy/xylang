@@ -16,7 +16,10 @@ void yyerror(char *);
 [,;]   return *yytext;
 
 	/* Skip whitespaces */
-[ \t]	;
+[ \t\n]	;
+
+	/* Skip comments */
+("/*".*"*/")|("//".*)	;
 
     /*  Unmatched charachter */
 .   yyerror("invalid character");
@@ -26,3 +29,4 @@ void yyerror(char *);
 int yywrap(void) {
     return 1;
 }
+
