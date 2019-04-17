@@ -36,22 +36,22 @@ extern int yylex();
 %left '+' '-' '&' '|'
 %left '*' '/' '<' '>' COND_EQ COND_GREQ COND_LSEQ COND_NEQ 
 
-//%type <nodeType> decConst decVar identifying type value op id stmt stmt2 arithmExpr
+//%type <nodeType> decConst decVar identifying type value op id stmts stmt arithmExpr
 
 %%
 
-program	: stmt				{ printf("valid\n"); }
+program	: stmts				{ printf("valid\n"); }
 		;
 	
-stmt    : stmt stmt2		
-        | stmt2				
+stmts	: stmts stmt		
+		| stmt
 		| '{' stmtornull	
-        ;
+		;
 
-stmt2   : decConstant { printf("decConst\n"); }
+stmt	: decConstant { printf("decConst\n"); }
 		| decVar { printf("decVar\n"); }
-		| assign ';' { printf("Assign\n"); }
-		| whilestmt { printf("While\n"); }
+		| assign ';' { printf("assignment\n"); }
+		| whilestmt { printf("while\n"); }
 		| dowhilestmt { printf("do\n"); }
 		| forloopstmt  { printf("for\n"); }
 		| switchcase { printf("switch\n"); }
@@ -164,11 +164,11 @@ cond	: cond '&' cond
 		;
 
 	
-stmtornull	: stmt '}'
+stmtornull	: stmts '}'
 			| '}'
 			;
 			
-stmtornull2 : ':' stmt
+stmtornull2 : ':' stmts
 			| ':'
 			;
 
