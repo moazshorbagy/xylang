@@ -1,0 +1,26 @@
+{
+	// my first program
+
+	int x;
+
+	for(z=4; z<=20; z=z+1) {
+		if(x==y) {
+			x = x + y;
+		}
+	}
+	
+	do {
+		switch(_) {
+			case(y): { float z = e; string s = "Hello"; }
+			case(0): int x = d;
+			default:	// do nothing
+		}
+	} while(x==z);
+
+	/*
+	int x = y;
+	if(x==y) {
+		x=x+y;
+	}
+	*/
+}

@@ -45,19 +45,73 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INT = 258,
-    FLOAT = 259,
-    VAR = 260
+    STRING_VAL = 258,
+    IDENTIFIER = 259,
+    BOOL_VAL = 260,
+    INT = 261,
+    FLOAT = 262,
+    BOOL = 263,
+    STRING = 264,
+    CONST = 265,
+    INT_VAL = 266,
+    FLOAT_VAL = 267,
+    COND_EQ = 268,
+    COND_GREQ = 269,
+    COND_LSEQ = 270,
+    COND_NEQ = 271,
+    WHILE = 272,
+    IF = 273,
+    ELSE = 274,
+    DO = 275,
+    FOR = 276,
+    SWITCH = 277,
+    CASE = 278,
+    DEFAULT = 279
   };
 #endif
 /* Tokens.  */
-#define INT 258
-#define FLOAT 259
-#define VAR 260
+#define STRING_VAL 258
+#define IDENTIFIER 259
+#define BOOL_VAL 260
+#define INT 261
+#define FLOAT 262
+#define BOOL 263
+#define STRING 264
+#define CONST 265
+#define INT_VAL 266
+#define FLOAT_VAL 267
+#define COND_EQ 268
+#define COND_GREQ 269
+#define COND_LSEQ 270
+#define COND_NEQ 271
+#define WHILE 272
+#define IF 273
+#define ELSE 274
+#define DO 275
+#define FOR 276
+#define SWITCH 277
+#define CASE 278
+#define DEFAULT 279
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+
+union YYSTYPE
+{
+#line 15 "x.y" /* yacc.c:1909  */
+
+	//nodeType* nodeTypeE;
+    char* strVal;
+    int intVal;
+    //TODO
+	char* boolVal;
+    float floatVal;
+    
+
+#line 112 "y.tab.h" /* yacc.c:1909  */
+};
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
