@@ -1,17 +1,28 @@
 {
+
 	// my first program
 
 	int x;
 
-	for(z=4; z<=20; z=z+1) {
-		if(x==y) {
-			x = x + y;
+	for(z[x+s+""]=0; z[0]<=20; z=z[0]+2) {
+		if(x==y[y+5==0]) {
+			x = x + y[""];
+
+			z = z[0*5+x];
+			if(3){x=x;}else{
+			y=y;}
 		}
+		else{
+			x=x+x;
+			x=54-s;}
 	}
+	{
+		x[0] = s[0];	
+		{}}
 	
 	do {
-		switch(_) {
-			case(y): { float z = e; string s = "Hello"; }
+		switch(a8j_[x]) {
+			case(y+z): { float z = e; string s = "Hello"; }
 			case(0): int x = d;
 			default:	// do nothing
 		}
@@ -20,7 +31,38 @@
 	/*
 	int x = y;
 	if(x==y) {
-		x=x+y;
+		x=x[0]+y;
 	}
 	*/
+	{}	
+	int [5] x ;
+
+
+	float ["l"] y;
+	int [x] x = { 2,"jo", z+z, x[0]};
 }
+
+/*
+Hi mezo
+This is our brainstorming of functions declarations grammar
+we haven't tried it, but it may guide you if you get stuck
+
+func: type IDENTIFIER '(' x ')' '{' stmtfn '}'
+| void IDENTIFIER '(' x ')' '{' stmtfn '}'
+| type IDENTIFIER '('')' '{' stmtfn '}'
+| void IDENTIFIER '(' ')' '{' stmtfn '}'
+;
+stmtfn: stmts
+	| RETURN exp;
+	| RETURN
+;
+
+
+x : x ',' type arg
+|type arg 
+;
+
+arg:  IDENTIFIER 
+| IDENTIFIER '[' exp ']'
+
+*/

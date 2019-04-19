@@ -41,11 +41,12 @@ void yyerror(char *);
 
     /* Language characters */
     
-[-=+*/;&|<>(){}:,]	{ return *yytext; }
+[-=+*/;&|<>(){}:,\[\]]	{ return *yytext; }
 "<="				{ return COND_GREQ; }
 ">="				{ return COND_LSEQ; }
 "=="				{ return COND_EQ; }
 "!="				{ return COND_NEQ; }
+
 
 	/* Skip whitespaces */
 

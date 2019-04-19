@@ -28,7 +28,7 @@ extern int yylex();
 %token <strVal> STRING_VAL
 %token <strVal> IDENTIFIER
 %token <boolVal> BOOL_VAL
-%token INT FLOAT BOOL STRING  CONST INT_VAL FLOAT_VAL COND_EQ  COND_GREQ COND_LSEQ COND_NEQ WHILE IF ELSE DO FOR SWITCH CASE DEFAULT
+%token INT FLOAT BOOL STRING  CONST INT_VAL FLOAT_VAL COND_EQ  COND_GREQ COND_LSEQ COND_NEQ WHILE IF ELSE DO FOR SWITCH CASE DEFAULT 
 
 %start  program
 // Associativity rules
@@ -45,7 +45,7 @@ program	: stmts				{ printf("valid\n"); }
 	
 stmts	: stmts stmt		
 		| stmt
-		| '{' stmtornull	
+				
 		;
 
 stmt	: decConstant { printf("decConst\n"); }
@@ -56,11 +56,25 @@ stmt	: decConstant { printf("decConst\n"); }
 		| forloopstmt  { printf("for\n"); }
 		| switchcase { printf("switch\n"); }
 		| matched { printf("if\n"); }
+		| decArr { printf("dec array\n");}
+		| '{' stmtornull
 		;
 	
 
 	/* Declarations */
-	
+
+decArr:
+		type '['expr']' IDENTIFIER withArr
+	;
+withArr:
+	';'
+	| '=''{' multipleExpr '}' ';'
+	;
+
+multipleExpr : expr
+	| multipleExpr ','expr
+	;
+
 decConstant :  CONST type IDENTIFIER '=' expr ';'
 			;
 
@@ -71,20 +85,23 @@ withVal	: ';'
 		| '=' expr ';'
 		;
 		
+
 assigndec	: IDENTIFIER '=' expr 
-	 		| type IDENTIFIER '=' expr
+	 	| type IDENTIFIER '=' expr
+		| IDENTIFIER '[' expr ']' '=' expr
 			;
 
 
 	/* Assignments */
 	
 assign	: IDENTIFIER '=' expr
+	| IDENTIFIER '[' expr ']' '=' expr
 		;
 
 
 	/* Conditional if-else */
 
-matched	: IF '(' expr ')' ifcont
+matched	: IF '(' cond ')' ifcont
 		;
 		
 ifcont	: '{' stmtornull 
@@ -133,6 +150,7 @@ expr	: INT_VAL
 		| BOOL_VAL
 		| STRING_VAL
 		| IDENTIFIER
+		| IDENTIFIER '[' expr ']'
 		| expr '+' expr
 		| expr '-' expr
 		| expr '*' expr
@@ -158,6 +176,7 @@ cond	: cond '&' cond
 		| cond COND_NEQ cond
 		| '(' cond ')'
 		| IDENTIFIER
+		| IDENTIFIER '[' expr ']'
 		| BOOL_VAL
 		| INT_VAL
 		| FLOAT_VAL
