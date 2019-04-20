@@ -16,7 +16,6 @@ extern int yylex();
 	//nodeType* nodeTypeE;
     char* strVal;
     int intVal;
-    //TODO
 	char* boolVal;
     float floatVal;
     
@@ -28,7 +27,7 @@ extern int yylex();
 %token <strVal> STRING_VAL
 %token <strVal> IDENTIFIER
 %token <boolVal> BOOL_VAL
-%token INT FLOAT BOOL STRING  CONST INT_VAL FLOAT_VAL COND_EQ  COND_GREQ COND_LSEQ COND_NEQ WHILE IF ELSE DO FOR SWITCH CASE DEFAULT 
+%token INT FLOAT BOOL STRING CONST INT_VAL FLOAT_VAL COND_EQ  COND_GREQ COND_LSEQ COND_NEQ WHILE IF ELSE DO FOR SWITCH CASE DEFAULT VOID RETURN FUNCTION MAIN
 
 %start  program
 // Associativity rules
@@ -40,12 +39,12 @@ extern int yylex();
 
 %%
 
-program	: stmts				{ printf("valid\n"); }
+program	: functions MAIN '{' stmts '}'	{ printf("valid with functions\n"); }
+		| MAIN '{' stmts '}' 			{ printf("valid\n"); }
 		;
 	
 stmts	: stmts stmt		
 		| stmt
-				
 		;
 
 stmt	: decConstant { printf("decConst\n"); }
@@ -56,24 +55,24 @@ stmt	: decConstant { printf("decConst\n"); }
 		| forloopstmt  { printf("for\n"); }
 		| switchcase { printf("switch\n"); }
 		| matched { printf("if\n"); }
-		| decArr { printf("dec array\n");}
+		| decArr { printf("dec array\n"); }
+		| return { printf("return\n"); }
 		| '{' stmtornull
 		;
 	
 
 	/* Declarations */
 
-decArr:
-		type '['expr']' IDENTIFIER withArr
-	;
-withArr:
-	';'
-	| '=''{' multipleExpr '}' ';'
-	;
+decArr	: type '['expr']' IDENTIFIER withArr
+		;
+		
+withArr	: ';'
+		| '=' '{' multipleExpr '}' ';'
+		;
 
-multipleExpr : expr
-	| multipleExpr ','expr
-	;
+multipleExpr	: expr
+				| multipleExpr ',' expr
+				;
 
 decConstant :  CONST type IDENTIFIER '=' expr ';'
 			;
@@ -87,15 +86,15 @@ withVal	: ';'
 		
 
 assigndec	: IDENTIFIER '=' expr 
-	 	| type IDENTIFIER '=' expr
-		| IDENTIFIER '[' expr ']' '=' expr
+	 		| type IDENTIFIER '=' expr
+			| IDENTIFIER '[' expr ']' '=' expr
 			;
 
 
 	/* Assignments */
 	
 assign	: IDENTIFIER '=' expr
-	| IDENTIFIER '[' expr ']' '=' expr
+		| IDENTIFIER '[' expr ']' '=' expr
 		;
 
 
@@ -193,11 +192,35 @@ stmtornull2 : ':' stmts
 
 	/* Types */
 	
-type	: INT 
-		| FLOAT 
-		| BOOL 
+type	: INT
+		| FLOAT
+		| BOOL
 		| STRING
 		;
+		
+		
+	/* Functions */
+	
+functions	: functions func
+			| func
+			;
+	
+func	: type FUNCTION IDENTIFIER '(' args ')' '{' stmts '}'
+		| VOID FUNCTION IDENTIFIER '(' args ')' '{' stmts '}'
+		| type FUNCTION IDENTIFIER '(' ')' '{' stmts '}'
+		| VOID FUNCTION IDENTIFIER '(' ')' '{' stmts '}'
+		;
+		
+args	: args ',' type argName
+		| type argName
+		;
+
+argName	: IDENTIFIER 
+		| IDENTIFIER '[' expr ']'
+    	;
+    	
+return	: RETURN expr ';'
+		| RETURN ';'
       
 
 %%

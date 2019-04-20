@@ -1,4 +1,14 @@
-{
+int function foo(int x, int y) {
+		int x = y;
+		return;
+}
+
+void function foffa() {
+		int x = y;
+		return x+y;
+}
+
+main {
 
 	// my first program
 
@@ -39,30 +49,5 @@
 
 
 	float ["l"] y;
-	int [x] x = { 2,"jo", z+z, x[0]};
+	int [x] x = { 2,"jo", z+z, x[0]};	
 }
-
-/*
-Hi mezo
-This is our brainstorming of functions declarations grammar
-we haven't tried it, but it may guide you if you get stuck
-
-func: type IDENTIFIER '(' x ')' '{' stmtfn '}'
-| void IDENTIFIER '(' x ')' '{' stmtfn '}'
-| type IDENTIFIER '('')' '{' stmtfn '}'
-| void IDENTIFIER '(' ')' '{' stmtfn '}'
-;
-stmtfn: stmts
-	| RETURN exp;
-	| RETURN
-;
-
-
-x : x ',' type arg
-|type arg 
-;
-
-arg:  IDENTIFIER 
-| IDENTIFIER '[' exp ']'
-
-*/

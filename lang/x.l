@@ -24,6 +24,10 @@ void yyerror(char *);
 "switch"	{ return SWITCH; }
 "case" 		{ return CASE; }
 "default" 	{ return DEFAULT; }
+"void"		{ return VOID; }
+"return"	{ return RETURN; }
+"function"	{ return FUNCTION; }
+"main"		{ return MAIN; }
 
 
     /* Data types */
