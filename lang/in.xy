@@ -3,7 +3,7 @@ int function foo(int x, int y) {
 		return;
 }
 
-void function foffa() {
+void function foo2() {
 		int x = y;
 		return x+y;
 }
@@ -49,5 +49,8 @@ main {
 
 
 	float ["l"] y;
-	int [x] x = { 2,"jo", z+z, x[0]};	
+	int [x] x = { 2,"jo", z+z, x[0]};
+	
+	foo();
+	x[15] = foo(foo(), foo(x, y[x]));
 }

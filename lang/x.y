@@ -5,20 +5,14 @@
 #include <string.h>
 int yyerror(char*);
 extern int yylex(); 
-
-//nodeType* opr(int oper, int nops, ...);
-//nodeType* con(int, conType);
-
 %}
 
 // data types for attributes within grammar
 %union {
-	//nodeType* nodeTypeE;
     char* strVal;
     int intVal;
 	char* boolVal;
     float floatVal;
-    
 }
 
 // %token for terminals
@@ -35,7 +29,6 @@ extern int yylex();
 %left '+' '-' '&' '|'
 %left '*' '/' '<' '>' COND_EQ COND_GREQ COND_LSEQ COND_NEQ 
 
-//%type <nodeType> decConst decVar identifying type value op id stmts stmt arithmExpr
 
 %%
 
@@ -57,6 +50,7 @@ stmt	: decConstant { printf("decConst\n"); }
 		| matched { printf("if\n"); }
 		| decArr { printf("dec array\n"); }
 		| return { printf("return\n"); }
+		| funccall ';' { printf("func call\n"); }
 		| '{' stmtornull
 		;
 	
@@ -163,6 +157,7 @@ expr	: INT_VAL
 		| expr COND_EQ expr
 		| expr COND_NEQ expr
 		| '(' expr ')'
+		| funccall
 		;
 
 cond	: cond '&' cond 
@@ -218,6 +213,14 @@ args	: args ',' type argName
 argName	: IDENTIFIER 
 		| IDENTIFIER '[' expr ']'
     	;
+    	
+params	: params ',' expr
+		| expr
+		;
+    	
+funccall	: IDENTIFIER '(' params ')'
+			| IDENTIFIER '(' ')'
+			;
     	
 return	: RETURN expr ';'
 		| RETURN ';'
