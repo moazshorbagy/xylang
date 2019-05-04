@@ -1,5 +1,6 @@
 %{
 #include "y.tab.h"
+#include "header.h"
 #include <stdlib.h>
 void yyerror(char *);
 %}
@@ -8,10 +9,10 @@ void yyerror(char *);
 
 	/* Constants */
 
-[-]?[0-9]+\.[0-9]+ { return FLOAT_VAL; }
-\".*\" { return STRING_VAL; }
-[-]?[0-9]+	{ return INT_VAL; }
-
+[0-9]+\.[0-9]+ { yylval.floatVal = atof(yytext); return FLOAT_VAL; }
+\".*\" { yylval.strVal = yytext; return STRING_VAL; }
+[0-9]+	{ yylval.intVal = atoi(yytext); return INT_VAL; }
+"true"|"false"	{yylval.strVal = yytext; return BOOL_VAL;}
 
    /* Keywords */
 
@@ -45,7 +46,7 @@ void yyerror(char *);
 
     /* Language characters */
     
-[-=+*/;&|<>(){}:,\[\]]	{ return *yytext; }
+[-=+*/;&|<>(){}:,\[\]~]	{ return *yytext; }
 "<="				{ return COND_GREQ; }
 ">="				{ return COND_LSEQ; }
 "=="				{ return COND_EQ; }

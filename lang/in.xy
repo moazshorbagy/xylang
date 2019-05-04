@@ -1,56 +1,15 @@
-int function foo(int x, int y) {
-		int x = y;
-		return;
-}
-
-void function foo2() {
-		int x = y;
-		return x+y;
-}
 
 main {
 
 	// my first program
-
-	int x;
-
-	for(z[x+s+""]=0; z[0]<=20; z=z[0]+2) {
-		if(x==y[y+5==0]) {
-			x = x + y[""];
-
-			z = z[0*5+x];
-			if(3){x=x;}else{
-			y=y;}
-		}
-		else{
-			x=x+x;
-			x=54-s;}
-	}
-	{
-		x[0] = s[0];	
-		{}}
 	
-	do {
-		switch(a8j_[x]) {
-			case(y+z): { float z = e; string s = "Hello"; }
-			case(0): int x = d;
-			default:	// do nothing
-		}
-	} while(x==z);
+	while (x==0)
+{
 
-	/*
-	int x = y;
-	if(x==y) {
-		x=x[0]+y;
-	}
-	*/
-	{}	
-	int [5] x ;
-
-
-	float ["l"] y;
-	int [x] x = { 2,"jo", z+z, x[0]};
-	
-	foo();
-	x[15] = foo(foo(), foo(x, y[x]));
+int x=0;
+if(c==0)
+{
+int x=0;
 }
+}
+}	

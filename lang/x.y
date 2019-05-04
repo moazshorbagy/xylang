@@ -1,23 +1,32 @@
 %{
+#include "header.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
+
 int yyerror(char*);
 extern int yylex(); 
+//prototypes
+nodeType *con(conTypeEnum type,char* value);
+nodeType *id(char* value);
+nodeType *getid(char* value);
+nodeType *opr(int oper, int nops, ...);
+
 %}
 
 // data types for attributes within grammar
 %union {
     char* strVal;
     int intVal;
-	char* boolVal;
+    char* boolVal;
     float floatVal;
-}
+    nodeType* nPtr;         
+};
 
 // %token for terminals
 
-
+%token <intVal> INT_VAL
+%token <floatVal> FLOAT_VAL
 %token <strVal> STRING_VAL
 %token <strVal> IDENTIFIER
 %token <boolVal> BOOL_VAL
@@ -28,12 +37,16 @@ extern int yylex();
 %nonassoc ELSE
 %left '+' '-' '&' '|'
 %left '*' '/' '<' '>' COND_EQ COND_GREQ COND_LSEQ COND_NEQ 
+%left '~'
 
+//%type
+
+%type <nPtr> expr
 
 %%
 
-program	: functions MAIN '{' stmts '}'	{ printf("valid with functions\n"); }
-		| MAIN '{' stmts '}' 			{ printf("valid\n"); }
+program	: functions MAIN openbraces  stmts closebraces	{ printf("valid with functions\n");  }
+		| MAIN openbraces  stmts closebraces 			{ printf("valid\n"); }
 		;
 	
 stmts	: stmts stmt		
@@ -51,7 +64,7 @@ stmt	: decConstant { printf("decConst\n"); }
 		| decArr { printf("dec array\n"); }
 		| return { printf("return\n"); }
 		| funccall ';' { printf("func call\n"); }
-		| '{' stmtornull
+		| openbraces stmtornull
 		;
 	
 
@@ -61,7 +74,7 @@ decArr	: type '['expr']' IDENTIFIER withArr
 		;
 		
 withArr	: ';'
-		| '=' '{' multipleExpr '}' ';'
+		| '=' openbraces  multipleExpr closebraces ';'
 		;
 
 multipleExpr	: expr
@@ -97,38 +110,37 @@ assign	: IDENTIFIER '=' expr
 matched	: IF '(' cond ')' ifcont
 		;
 		
-ifcont	: '{' stmtornull 
-		| '{' stmtornull  ELSE '{' stmtornull
+ifcont	: openbraces  stmtornull 
+		| openbraces  stmtornull  ELSE openbraces stmtornull
 		;
 		
 		
 	/* Loops */
 
-whilestmt	: WHILE '(' cond ')' '{' stmtornull
+whilestmt	: WHILE '(' cond ')' openbraces stmtornull { printf("while2\n"); }
 			;
 
-
-dowhilestmt	: DO '{' stmtornull WHILE '(' cond ')' ';'
+dowhilestmt	: DO openbraces  stmtornull WHILE '(' cond ')' ';'
 			;
 
 forloopstmt	: FOR '(' assigndec ';' cond ';' forloopcont
 			;
 
-forloopcont	: assign ')' '{' stmtornull
-			|  ')' '{' stmtornull
+forloopcont	: assign ')' openbraces  stmtornull
+			|  ')' openbraces  stmtornull
 			;
 
 
 	/* Switch-case */
 
-switchcase	: SWITCH '(' expr ')' '{' cases
+switchcase	: SWITCH '(' expr ')' openbraces  cases
 			;
 
-cases		: switching nodef | '}' | DEFAULT ':' stmtornull
+cases		: switching nodef | closebraces | DEFAULT ':' stmtornull
 			;
 
 nodef	: DEFAULT ':' stmtornull
-		| '}'
+		| closebraces
 		;
 
 switching	: switching CASE '(' expr ')' stmtornull2
@@ -138,15 +150,16 @@ switching	: switching CASE '(' expr ')' stmtornull2
 
 	/* Expressions */
 
-expr	: INT_VAL
-		| FLOAT_VAL
-		| BOOL_VAL
-		| STRING_VAL
-		| IDENTIFIER
+expr	: 	INT_VAL   	{char buffer[30]; itoa($1, buffer, 10); $$=con(typefloat,buffer);}
+		| FLOAT_VAL	{char buffer[30]; ftoa($1, buffer, 10); $$=con(typefloat,buffer);}
+		| BOOL_VAL	{$$=con(typebool,$1);}
+		| STRING_VAL	{$$=con(typestring,$1);}
+		|'~'expr	{$$=opr('~', 1, $2);}
+		| IDENTIFIER		
 		| IDENTIFIER '[' expr ']'
-		| expr '+' expr
-		| expr '-' expr
-		| expr '*' expr
+		| expr '+' expr	 { printf("plus\n"); }
+		| expr '-' expr  { printf("minus\n"); }
+		| expr '*' expr	 { printf("8\n"); }
 		| expr '/' expr
 		| expr '&' expr 
 		| expr '|' expr
@@ -177,8 +190,8 @@ cond	: cond '&' cond
 		;
 
 	
-stmtornull	: stmts '}'
-			| '}'
+stmtornull	: stmts closebraces
+			| closebraces
 			;
 			
 stmtornull2 : ':' stmts
@@ -196,14 +209,14 @@ type	: INT
 		
 	/* Functions */
 	
-functions	: functions func
-			| func
+functions	: functions func	{printf("func");}
+			| func		{printf("func");}
 			;
 	
-func	: type FUNCTION IDENTIFIER '(' args ')' '{' stmts '}'
-		| VOID FUNCTION IDENTIFIER '(' args ')' '{' stmts '}'
-		| type FUNCTION IDENTIFIER '(' ')' '{' stmts '}'
-		| VOID FUNCTION IDENTIFIER '(' ')' '{' stmts '}'
+func	: type FUNCTION IDENTIFIER '(' args ')' openbraces  stmts closebraces
+		| VOID FUNCTION IDENTIFIER '(' args ')' openbraces  stmts closebraces
+		| type FUNCTION IDENTIFIER '(' ')' openbraces  stmts closebraces
+		| VOID FUNCTION IDENTIFIER '(' ')' openbraces  stmts closebraces
 		;
 		
 args	: args ',' type argName
@@ -224,10 +237,84 @@ funccall	: IDENTIFIER '(' params ')'
     	
 return	: RETURN expr ';'
 		| RETURN ';'
+;
       
+
+
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+openbraces : '{'					  { printf("openbraces\n");} 
+	;
+closebraces : '}'					  { printf("closebraces\n");}
+	; 
 
 %%
 
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+#define SIZEOF_NODETYPE ((char *)&p->con - (char *)p) 
+
+nodeType *con(conTypeEnum type,char* value) {
+     nodeType *p;     /* allocate node */
+
+     if ((p = malloc(sizeof(nodeType))) == NULL)
+         yyerror("out of memory");     
+
+	/* copy information */
+     p->type = typeCon;
+     p->con.value = value;
+     p->con.type = type;
+     return p; 
+}
+
+nodeType *id(char*  value) {
+     nodeType *p;     /* allocate node */
+     if ((p = malloc(sizeof(nodeType))) == NULL)
+         yyerror("out of memory");
+     /* copy information */
+int i = 0; // TODO
+     p->type = typeId;
+     p->id.i = i;
+     return p;
+ } 
+nodeType *getid(char* value) {
+     nodeType *p;     /* allocate node */
+     if ((p = malloc(sizeof(nodeType))) == NULL)
+         yyerror("out of memory");
+//look up the symbol table to get values
+int i = 0; // TODO
+     /* copy information */
+     p->type = typeId;
+     p->id.i = i;
+     return p;
+ } 
+nodeType *opr(int oper, int nops, ...) {    
+ 	va_list ap;    
+ 	nodeType *p;   
+  	int i;
+     /* allocate node */
+     if ((p = malloc(sizeof(nodeType))) == NULL)
+         yyerror("out of memory");
+     if ((p->opr.op = malloc(nops * sizeof(nodeType))) == NULL)
+         yyerror("out of memory");
+     /* copy information */
+     p->type = typeOpr;
+     p->opr.oper = oper;
+     p->opr.nops = nops;
+     va_start(ap, nops);
+     for (i = 0; i < nops; i++)
+         p->opr.op[i] = va_arg(ap, nodeType*);
+     va_end(ap);
+     return p;
+ } 
+
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
 extern FILE *yyin;
 
 int yyerror(char *msg) {
