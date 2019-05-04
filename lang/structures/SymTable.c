@@ -71,7 +71,7 @@ int symInsert(struct SymTable *table, char *label, char *type, union Value value
     while (table->symTable[hashIndex] != NULL)
     {
         // if a symbol with the same label already exists in the specified symTable give a semantic error
-        if (strcmp(label, table->symTable[hashIndex]->label) != 0)
+        if (strcmp(label, table->symTable[hashIndex]->label) == 0)
             return -1;
 
         if (hashIndex == TABLE_SIZE - 1)
@@ -86,14 +86,7 @@ int symInsert(struct SymTable *table, char *label, char *type, union Value value
     symbol->label = label;
     symbol->type = type;
     symbol->myTable = table;
-    if (strcmp(type, "int") != 0)
-        symbol->symValue.intVal = value.intVal;
-    else if (strcmp(type, "float") != 0)
-        symbol->symValue.floatVal = value.floatVal;
-    else if (strcmp(type, "bool") != 0)
-        symbol->symValue.boolVal = value.boolVal;
-    else if (strcmp(type, "string") != 0)
-        symbol->symValue.strVal = value.strVal;
+    symbol->symValue = value;
 
     // adding the new symbol to the specified symTable
     table->symTable[hashIndex] = symbol;
@@ -108,15 +101,7 @@ int symUpdate(struct SymTable *table, char *label, char *type, union Value value
         return -1;
 
     symbol->type = type;
-    if (strcmp(type, "int") != 0)
-        symbol->symValue.intVal = value.intVal;
-    else if (strcmp(type, "float") != 0)
-        symbol->symValue.floatVal = value.floatVal;
-    else if (strcmp(type, "bool") != 0)
-        symbol->symValue.boolVal = value.boolVal;
-    else if (strcmp(type, "string") != 0)
-        symbol->symValue.strVal = value.strVal;
-
+    symbol->symValue = value;
     return 1;
 }
 
