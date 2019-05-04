@@ -41,7 +41,7 @@ struct Symbol *symLookup(struct SymTable *table, char *label)
     while (true)
     {
         // linear probing
-        while (tempTable->symTable[tempHashIndex] != NULL && strcmp(tempTable->symTable[tempHashIndex]->label, label) == 0)
+        while (tempTable->symTable[tempHashIndex] != NULL && strcmp(tempTable->symTable[tempHashIndex]->label, label) != 0)
         {
             if (tempHashIndex == TABLE_SIZE - 1)
             {
@@ -51,14 +51,14 @@ struct Symbol *symLookup(struct SymTable *table, char *label)
         }
 
         // if (the symbol is found) OR (i've searched in the global table) then break
-        if (tempTable->symTable[hashIndex] != NULL || tempTable->parent == NULL)
+        if (tempTable->symTable[tempHashIndex] != NULL || tempTable->parent == NULL)
             break;
 
         tempTable = tempTable->parent;
         tempHashIndex = hashIndex;
     }
 
-    return table->symTable[hashIndex];
+    return tempTable->symTable[tempHashIndex];
 }
 
 int symInsert(struct SymTable *table, char *label, char *type, union Value value)
@@ -118,4 +118,17 @@ int symUpdate(struct SymTable *table, char *label, char *type, union Value value
         symbol->symValue.strVal = value.strVal;
 
     return 1;
+}
+
+void symTablePrint(struct SymTable *table)
+{
+    printf("printing table: %p\n", table);
+    for (int i = 0; i < TABLE_SIZE; i++)
+    {
+        if (table->symTable[i] != NULL)
+        {
+            printf("label: %s index: %d\n", table->symTable[i]->label, i);
+        }
+    }
+    printf("\n");
 }
