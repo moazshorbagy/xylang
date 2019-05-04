@@ -34,14 +34,28 @@ int _hash(char *label)
 struct Symbol *symLookup(struct SymTable *table, char *label)
 {
     int hashIndex = _hash(label);
-    // Linear probing
-    while (table->symTable[hashIndex] != NULL && strcmp(table->symTable[hashIndex]->label, label) == 0)
+
+    struct SymTable *tempTable = table;
+    int tempHashIndex = hashIndex;
+    // searching in the specified symbol table and his ancestors
+    while (true)
     {
-        if (hashIndex == TABLE_SIZE - 1)
+        // linear probing
+        while (tempTable->symTable[tempHashIndex] != NULL && strcmp(tempTable->symTable[tempHashIndex]->label, label) == 0)
         {
-            hashIndex = -1;
+            if (tempHashIndex == TABLE_SIZE - 1)
+            {
+                tempHashIndex = -1;
+            }
+            tempHashIndex++;
         }
-        hashIndex++;
+
+        // if (the symbol is found) OR (i've searched in the global table) then break
+        if (tempTable->symTable[hashIndex] != NULL || tempTable->parent == NULL)
+            break;
+
+        tempTable = tempTable->parent;
+        tempHashIndex = hashIndex;
     }
 
     return table->symTable[hashIndex];
@@ -52,9 +66,26 @@ int symInsert(struct SymTable *table, char *label, char *type, union Value value
     if (table->symbolsCount == TABLE_SIZE - 1)
         return -1;
 
+    int hashIndex = _hash(label);
+    // Linear probing
+    while (table->symTable[hashIndex] != NULL)
+    {
+        // if a symbol with the same label already exists in the specified symTable give a semantic error
+        if (strcmp(label, table->symTable[hashIndex]->label) != 0)
+            return -1;
+
+        if (hashIndex == TABLE_SIZE - 1)
+        {
+            hashIndex = -1;
+        }
+        hashIndex++;
+    }
+
+    // allocating the new symbol
     struct Symbol *symbol = malloc(sizeof(struct Symbol));
     symbol->label = label;
     symbol->type = type;
+    symbol->myTable = table;
     if (strcmp(type, "int") != 0)
         symbol->symValue.intVal = value.intVal;
     else if (strcmp(type, "float") != 0)
@@ -64,16 +95,7 @@ int symInsert(struct SymTable *table, char *label, char *type, union Value value
     else if (strcmp(type, "string") != 0)
         symbol->symValue.strVal = value.strVal;
 
-    int hashIndex = _hash(label);
-    // Linear probing
-    while (table->symTable[hashIndex] != NULL)
-    {
-        if (hashIndex == TABLE_SIZE - 1)
-        {
-            hashIndex = -1;
-        }
-        hashIndex++;
-    }
+    // adding the new symbol to the specified symTable
     table->symTable[hashIndex] = symbol;
 
     return 1;

@@ -17,8 +17,11 @@ union Value {
 struct Symbol
 {
     char *label;
-    char *type;
+    char *type; // variable, const_variable, array, const_array, function, parameter
+    char *datatype;
     union Value symValue;
+    char **args; // datatypes for function arguments
+    struct SymTable *myTable;
 };
 
 struct SymTable
