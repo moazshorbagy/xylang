@@ -61,7 +61,7 @@ struct Symbol *symLookup(struct SymTable *table, char *label)
     return tempTable->symTable[tempHashIndex];
 }
 
-int symInsert(struct SymTable *table, char *label, char *type, union Value value)
+int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum datatype, union Value value)
 {
     if (table->symbolsCount == TABLE_SIZE - 1)
         return -1;
@@ -85,6 +85,7 @@ int symInsert(struct SymTable *table, char *label, char *type, union Value value
     struct Symbol *symbol = malloc(sizeof(struct Symbol));
     symbol->label = label;
     symbol->type = type;
+    symbol->datatype = datatype;
     symbol->myTable = table;
     symbol->symValue = value;
 
@@ -94,13 +95,14 @@ int symInsert(struct SymTable *table, char *label, char *type, union Value value
     return 1;
 }
 
-int symUpdate(struct SymTable *table, char *label, char *type, union Value value)
+int symUpdate(struct SymTable *table, char *label, Type type, conTypeEnum datatype, union Value value)
 {
     struct Symbol *symbol = symLookup(table, label);
     if (symbol == NULL)
         return -1;
 
     symbol->type = type;
+    symbol->datatype = datatype;
     symbol->symValue = value;
     return 1;
 }

@@ -1,11 +1,22 @@
 #ifndef STRUCT_DEFS
 #define STRUCT_DEFS
 #include <stdbool.h>
+#include "../header.h"
 
 #define TABLE_SIZE 20            // number of symbols per symbol table
 #define MAX_CHILDREN_IN_TABLE 20 // can be removed later
 
 // Structures required for symbol table
+
+typedef enum
+{
+    variable,
+    constVariable,
+    array,
+    constArray,
+    function,
+    parameter
+} Type;
 
 union Value {
     int intVal;
@@ -17,8 +28,8 @@ union Value {
 struct Symbol
 {
     char *label;
-    char *type; // variable, const_variable, array, const_array, function, parameter
-    char *datatype;
+    Type type;
+    conTypeEnum datatype;
     union Value symValue;
     char **args; // datatypes for function arguments
     struct SymTable *myTable;
