@@ -1,15 +1,5 @@
 
 main {
+ int z =   true|false ;
 
-	// my first program
-	
-	while (x==0)
-{
-
-int x=0;
-if(c==0)
-{
-int x=0;
-}
-}
 }	

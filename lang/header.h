@@ -1,16 +1,33 @@
+#include <stdbool.h>
+#include "structures\struct_defs.h"
+
 typedef enum { typeCon, typeId, typeOpr} nodeEnum;
-typedef enum { typeint, typefloat, typestring,typebool} conTypeEnum;
+typedef enum { typeint, typefloat, typestring, typebool, typevoid} conTypeEnum;
+
+
 /* constants */
-typedef struct {
-		
+typedef struct {		
 	conTypeEnum type;
-	char* value;
+
+	union {
+		char* strVal;
+		int intVal;
+		bool boolVal;
+		float floatVal;
+	};
 } conNodeType;
+
+
 
 /* identifiers*/
 typedef struct {
-	int i;  // id in symbol table
+	// Name of the id
+	char* label;
+	// Pointer to the symbol table where this identifier lies
+	struct SymTable* symTablePtr;  
 }idNodeType;
+
+
 
 /* opertaor*/
 typedef struct {
@@ -19,9 +36,11 @@ typedef struct {
 	struct nodeTypeTag **op;
 } oprNodeType;
 
+
+
 typedef struct nodeTypeTag{
 	nodeEnum type;
-
+	conTypeEnum retType;
 	union {
 		conNodeType con;
 		idNodeType id;

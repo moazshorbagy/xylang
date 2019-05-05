@@ -1,18 +1,27 @@
 %{
-#include "y.tab.h"
 #include "header.h"
+#include "x.tab.h"
+
+#include <string.h>
 #include <stdlib.h>
 void yyerror(char *);
 %}
-
+%pointer
 %%
 
 	/* Constants */
 
-[0-9]+\.[0-9]+ { yylval.floatVal = atof(yytext); return FLOAT_VAL; }
-\".*\" { yylval.strVal = yytext; return STRING_VAL; }
-[0-9]+	{ yylval.intVal = atoi(yytext); return INT_VAL; }
-"true"|"false"	{yylval.strVal = yytext; return BOOL_VAL;}
+[0-9]+\.[0-9]+      { yylval.floatVal = atof(yytext); return FLOAT_VAL; }
+(\"([^\"])*\")      { yylval.strVal = strdup(yytext); return STRING_VAL; }
+[0-9]+	            { yylval.intVal = atoi(yytext); return INT_VAL; }
+"true"|"false"	    {
+                        if(strcmp( yytext , "true") != 0 ){
+                            yylval.boolVal = true;
+                        }else{
+                            yylval.boolVal = false;
+                        }
+                        return BOOL_VAL;
+                    }
 
    /* Keywords */
 
@@ -33,15 +42,17 @@ void yyerror(char *);
 
     /* Data types */
 
-"int"		{ return INT; }
-"float"		{ return FLOAT; }
-"string"	{ return STRING; }
-"bool" 		{ return BOOL; }
+"int"		{ yylval.conType = typeint; return INT; }
+"float"		{ yylval.conType = typefloat; return FLOAT; }
+"string"	{ yylval.conType = typestring; return STRING; }
+"bool" 		{ yylval.conType = typebool; return BOOL; }
 
 
     /* Identifier */
     
-[A-Za-z_][A-Za-z0-9_]*	{ return IDENTIFIER; }
+[A-Za-z_][A-Za-z0-9_]*	{
+                        yylval.strVal=strdup(yytext);
+                         return IDENTIFIER; }
 
 
     /* Language characters */
