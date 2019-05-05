@@ -12,7 +12,7 @@ void yyerror(char *);
 	/* Constants */
 
 [0-9]+\.[0-9]+      { yylval.floatVal = atof(yytext); return FLOAT_VAL; }
-\".*\"              { yylval.strVal = yytext; return STRING_VAL; }
+(\"([^\"])*\")      { yylval.strVal = strdup(yytext); return STRING_VAL; }
 [0-9]+	            { yylval.intVal = atoi(yytext); return INT_VAL; }
 "true"|"false"	    {
                         if(strcmp( yytext , "true") != 0 ){

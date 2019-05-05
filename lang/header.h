@@ -2,7 +2,7 @@
 #include "structures\struct_defs.h"
 
 typedef enum { typeCon, typeId, typeOpr} nodeEnum;
-typedef enum { typeint, typefloat, typestring, typebool} conTypeEnum;
+typedef enum { typeint, typefloat, typestring, typebool, typevoid} conTypeEnum;
 
 
 /* constants */
@@ -40,7 +40,7 @@ typedef struct {
 
 typedef struct nodeTypeTag{
 	nodeEnum type;
-
+	conTypeEnum retType;
 	union {
 		conNodeType con;
 		idNodeType id;

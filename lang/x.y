@@ -17,7 +17,7 @@ nodeType *con(conTypeEnum type,union Value);
 nodeType *id(char*  label, char* type, conTypeEnum dataType);
 nodeType *getid(char* value);
 nodeType *opr(int oper, int nops, ...);
-
+void oprSemanticChecks( nodeType* p);
 
 
 struct SymTable* currentSymTable;
@@ -302,7 +302,7 @@ nodeType *con(conTypeEnum type, union Value value) {
 	}
     
     p->con.type = type;
-
+	p->retType = type;
 	
     return p; 
 }
@@ -322,6 +322,7 @@ nodeType *id(char*  label, char* type, conTypeEnum dataType) {
 	p->id.label = label;
     p->id.symTablePtr = currentSymTable;
 	
+	p->retType = dataType;
 	
 	 return p;
  } 
@@ -379,10 +380,54 @@ nodeType *opr(int oper, int nops, ...) {
 	
 	
 	//TODO: Semantic checks
-
+	oprSemanticChecks(p);
     return p;
  } 
 
+void oprSemanticChecks( nodeType* p){
+	
+	// Arithmetic check : types are same and are numbers //
+	if(p->opr.oper == '+' || p->opr.oper == '-' || p->opr.oper == '*' || p->opr.oper == '/' ){
+		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\nshit\n");
+		}
+		
+	}
+
+	// Logical expressions //
+	// Check for == or != 
+	else if( p->opr.oper == COND_EQ || p->opr.oper == COND_NEQ){
+		// Check types equal and are numbers or booleans
+		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint 
+		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\nshit\n");
+		}
+	}
+	// Check for < <= > >=
+	else if( p->opr.oper == '<' || p->opr.oper == '>' || p->opr.oper == COND_GREQ 
+	|| p->opr.oper == COND_LSEQ ){
+		// Check types equal and are numbers
+		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\nshit\n");
+		}
+	}
+	// Check for & |
+	else if( p->opr.oper == '|' || p->opr.oper == '&'){
+		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
+			p->retType = typebool;
+		}else{
+			printf("\nshit\n");
+		}
+	}
+
+	
+}
 
 
 /////////////////////////////////////////////////////////
