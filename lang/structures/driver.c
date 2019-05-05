@@ -20,19 +20,24 @@ int main(int argc, char const *argv[])
     endScope(T);
 
     union Value v;
+
     v.intVal = 5;
-    symInsert(T->currSymTable, "myVar", "int", v);
+    symInsert(T->currSymTable, "var1", variable, typeint);
+    symUpdate(T->currSymTable, "var1", true, true, &v);
 
-    struct Symbol *mySymbol = symLookup(T->currSymTable, "myVar");
+    v.intVal = 20;
+    symInsert(T->currSymTable, "var2", variable, typeint);
+    symUpdate(T->currSymTable, "var2", true, true, &v);
 
-    if (mySymbol)
-        printf("Retrieved Symbol:\nlabel: %s\ntype: %s\nvalue: %d\n\n", mySymbol->label, mySymbol->type, (int)mySymbol->symValue.intVal);
+    struct Symbol *sym1 = symLookup(T->currSymTable, "var1");
+    if (sym1)
+        printf("Retrieved Symbol:\nlabel: %s\nvalue: %d\n\n", sym1->label, (int)sym1->symValue->intVal);
 
-    v.strVal = "Well, this is a string";
-    symUpdate(T->currSymTable, "myVar", "string", v);
+    struct Symbol *sym2 = symLookup(T->currSymTable, "var2");
+    if (sym2)
+        printf("Retrieved Symbol:\nlabel: %s\nvalue: %d\n\n", sym2->label, (int)sym2->symValue->intVal);
 
-    if (mySymbol)
-        printf("Retrieved Symbol:\nlabel: %s\ntype: %s\nvalue: %s\n\n", mySymbol->label, mySymbol->type, (char *)mySymbol->symValue.strVal);
+    symTablePrint(T->currSymTable);
 
     printf("Number of local scopes: %d\n", T->currSymTable->addChildIndex);
     for (int i = 0; i < T->currSymTable->addChildIndex; i++)

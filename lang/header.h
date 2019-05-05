@@ -1,3 +1,5 @@
+#ifndef MY_HEADER
+#define MY_HEADER
 #include <stdbool.h>
 #include "structures\struct_defs.h"
 
@@ -47,3 +49,5 @@ typedef struct nodeTypeTag{
 		oprNodeType opr;
 	};
 }nodeType;
+
+#endif

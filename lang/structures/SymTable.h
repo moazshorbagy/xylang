@@ -9,10 +9,10 @@ struct SymTable *symAllocate();
 struct Symbol *symLookup(struct SymTable *, char *);
 
 // inserts a Symbol in the SymTable specified
-int symInsert(struct SymTable *, char *, Type, conTypeEnum, union Value);
+int symInsert(struct SymTable *, char *label, Type, conTypeEnum);
 
 // finds the Symbol in the specified SymTable and his ancestors and updates its value
-int symUpdate(struct SymTable *, char *, Type, conTypeEnum, union Value);
+int symUpdate(struct SymTable *, char *label, bool isInitialized, bool isUsed, union Value *);
 
 void symTablePrint(struct SymTable *);
 

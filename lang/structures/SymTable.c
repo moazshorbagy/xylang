@@ -61,7 +61,7 @@ struct Symbol *symLookup(struct SymTable *table, char *label)
     return tempTable->symTable[tempHashIndex];
 }
 
-int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum datatype, union Value value)
+int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum datatype)
 {
     if (table->symbolsCount == TABLE_SIZE - 1)
         return -1;
@@ -86,8 +86,11 @@ int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum dataty
     symbol->label = label;
     symbol->type = type;
     symbol->datatype = datatype;
+    symbol->args = NULL;
+    symbol->isInitialized = false;
+    symbol->isUsed = false;
+    symbol->symValue = NULL;
     symbol->myTable = table;
-    symbol->symValue = value;
 
     // adding the new symbol to the specified symTable
     table->symTable[hashIndex] = symbol;
@@ -95,15 +98,21 @@ int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum dataty
     return 1;
 }
 
-int symUpdate(struct SymTable *table, char *label, Type type, conTypeEnum datatype, union Value value)
+int symUpdate(struct SymTable *table, char *label, bool isInitialized, bool isUsed, union Value *value)
 {
     struct Symbol *symbol = symLookup(table, label);
     if (symbol == NULL)
         return -1;
 
-    symbol->type = type;
-    symbol->datatype = datatype;
-    symbol->symValue = value;
+    symbol->isInitialized = isInitialized;
+    symbol->isUsed = isUsed;
+    if (value != NULL)
+    {
+        // used dynamic allocation to take control of the lifetime and be independent of input changes after the function call
+        union Value *v = malloc(sizeof(union Value));
+        *v = *value;
+        symbol->symValue = v;
+    }
     return 1;
 }
 
@@ -114,7 +123,30 @@ void symTablePrint(struct SymTable *table)
     {
         if (table->symTable[i] != NULL)
         {
-            printf("label: %s index: %d\n", table->symTable[i]->label, i);
+            printf("label: %s index: %d", table->symTable[i]->label, i);
+            if (table->symTable[i]->isInitialized)
+                switch (table->symTable[i]->datatype)
+                {
+                case typeint:
+                    printf(" value: %d", table->symTable[i]->symValue->intVal);
+                    break;
+
+                case typefloat:
+                    printf(" value: %f", table->symTable[i]->symValue->floatVal);
+                    break;
+
+                case typestring:
+                    printf(" value: %s", table->symTable[i]->symValue->strVal);
+                    break;
+
+                case typebool:
+                    printf(" value: %s", table->symTable[i]->symValue->boolVal ? "true" : "false");
+                    break;
+
+                default:
+                    break;
+                }
+            printf("\n");
         }
     }
     printf("\n");

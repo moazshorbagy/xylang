@@ -30,9 +30,11 @@ struct Symbol
     char *label;
     Type type;
     conTypeEnum datatype;
-    union Value symValue;
+    union Value *symValue;
     char **args; // datatypes for function arguments
-    struct SymTable *myTable;
+    bool isInitialized;
+    bool isUsed;
+    struct SymTable *myTable; // the table where the symbol is stored
 };
 
 struct SymTable
