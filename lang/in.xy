@@ -1,15 +1,5 @@
 
 main {
-
-	// my first program
-	
-	while (x==0)
-{
-
-int x=0;
-if(c==0)
-{
-int x=0;
-}
-}
+const int z = x + ysss*z;
+int as = 0;
 }	
