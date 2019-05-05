@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <string.h>
 
 int yyerror(char*);
 extern int yylex(); 
@@ -98,7 +99,7 @@ multipleExpr	: expr
 				| multipleExpr ',' expr
 				;
 
-decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr('=', 2, id($3, "const_var", $2), $5); }
+decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, "const_var", $2), $5); }
 			;
 
 decVar	: type IDENTIFIER withVal						{ if($3==NULL){
@@ -313,11 +314,15 @@ nodeType *id(char*  label, char* type, conTypeEnum dataType) {
          yyerror("out of memory");
 	}
 	 
-	 
 	union Value  x;
 	x.intVal = 1;
+
 	int flag = symInsert(currentSymTable, label, type, x);
-	 
+	
+	if(flag == -1){
+		printf("Redeclaration");
+	}
+
 	p->type = typeId;
 	p->id.label = label;
     p->id.symTablePtr = currentSymTable;
@@ -329,20 +334,22 @@ nodeType *id(char*  label, char* type, conTypeEnum dataType) {
 
 nodeType *getid(char* value) {
 	
-     nodeType *p;     /* allocate node */
-     if ((p = malloc(sizeof(nodeType))) == NULL)
+    nodeType *p;     /* allocate node */
+    if ((p = malloc(sizeof(nodeType))) == NULL)
          yyerror("out of memory");
 	//look up the symbol table to get values
-	
+	struct Symbol* sym= symLookup(currentSymTable, value);
+
+	if(sym == NULL){
+		printf("var not found\n");
+	}else{
      /* copy information */
-     p->type = typeId;
-	 p->id.label = value;
-     p->id.symTablePtr = currentSymTable;
-	 //todo above line
-
-	 //TODO : scope check
-
-     return p;
+		p->type = typeId;
+		p->id.label = value;
+		p->id.symTablePtr = sym->myTable;
+	}
+	 
+    return p;
  } 
 
 nodeType *opr(int oper, int nops, ...) {    
@@ -354,17 +361,19 @@ nodeType *opr(int oper, int nops, ...) {
         yyerror("out of memory");
     if ((p->opr.op = malloc(nops * sizeof(nodeType))) == NULL)
         yyerror("out of memory");
+	
     /* copy information */
     p->type = typeOpr;
     p->opr.oper = oper;
     p->opr.nops = nops;
+	
     va_start(ap, nops);
     for (i = 0; i < nops; i++)
         p->opr.op[i] = va_arg(ap, nodeType*);
     va_end(ap);
-
+	
 	if(oper==WHILE){
-		printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
+		//printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
 	}
 	if(oper==DO){
 		printf("\nDOOOOOO\n %d \n %d\n",  p->opr.op[0]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal, p->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
@@ -419,14 +428,32 @@ void oprSemanticChecks( nodeType* p){
 	}
 	// Check for & |
 	else if( p->opr.oper == '|' || p->opr.oper == '&'){
+		// Check types are equal and booleans
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
 			p->retType = typebool;
 		}else{
 			printf("\nshit\n");
 		}
 	}
+	// CHeck for ~
+	else if (p->opr.oper == '~'){
+		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\nshit\n");
+		}
+	}
+	//Check for = (Assignment)
+	// else if (p->opr.oper == '='){	
+	// 	// Check types are equal in the left hand side is not a const
+	// 	if( (p->opr.op[0]->retType == p->opr.op[1]->retType) && 
+	// 	(p->opr.op[0]->type !=typeId ||(p->opr.op[0]->type == typeId && strcmp( symLookup(currentSymTable,p->opr.op[0]->id.label)->type,"const_var")!=0 && strcmp( symLookup(currentSymTable,p->opr.op[0]->id.label)->type,"const_array")!=0  ))){
+	// 		p->retType = p->opr.op[0]->retType;
+	// 	}else{
+	// 		printf("\nshit\n");
+	// 	}
+	// }
 
-	
 }
 
 

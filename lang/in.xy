@@ -1,5 +1,8 @@
 
 main {
- int z =   true|false ;
+  int x;
+  while(c<0){
+	  	
+  }
 
 }	
