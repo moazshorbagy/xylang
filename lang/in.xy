@@ -1,8 +1,10 @@
 
 main {
-  int x;
-  while(c<0){
-	  	
+  int x = 0;
+  
+  //int y;
+  for(x=0; x<0;){
+	  int y; 
   }
-
+//y = 0;
 }	

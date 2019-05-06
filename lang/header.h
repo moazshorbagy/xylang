@@ -1,8 +1,10 @@
+#ifndef MY_HEADER
+#define MY_HEADER
 #include <stdbool.h>
 #include "structures\struct_defs.h"
 
 typedef enum { typeCon, typeId, typeOpr} nodeEnum;
-typedef enum { typeint, typefloat, typestring, typebool, typevoid} conTypeEnum;
+
 
 
 /* constants */
@@ -47,3 +49,5 @@ typedef struct nodeTypeTag{
 		oprNodeType opr;
 	};
 }nodeType;
+
+#endif

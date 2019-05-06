@@ -86,7 +86,7 @@ int yyerror(char*);
 extern int yylex(); 
 //prototypes
 nodeType *con(conTypeEnum type,union Value);
-nodeType *id(char*  label, char* type, conTypeEnum dataType);
+nodeType *id(char*  label, Type type, conTypeEnum dataType);
 nodeType *getid(char* value);
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
@@ -1712,42 +1712,42 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 74 "x.y"
-    { printf("decConst\n"); ;}
+    { printf("decConst\n"); (yyval.nPtr) = (yyvsp[(1) - (1)].nPtr); ;}
     break;
 
   case 7:
 
 /* Line 1455 of yacc.c  */
 #line 75 "x.y"
-    { printf("decVar\n"); ;}
+    { printf("decVar\n"); (yyval.nPtr) = (yyvsp[(1) - (1)].nPtr);;}
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
 #line 76 "x.y"
-    { printf("assignment\n"); ;}
+    { printf("assignment\n");(yyval.nPtr) = (yyvsp[(1) - (2)].nPtr); ;}
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
 #line 77 "x.y"
-    { printf("while\n"); ;}
+    { printf("while\n"); (yyval.nPtr) = (yyvsp[(1) - (1)].nPtr);;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
 #line 78 "x.y"
-    { printf("do\n"); ;}
+    { printf("do\n"); (yyval.nPtr) = (yyvsp[(1) - (1)].nPtr);;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
 #line 79 "x.y"
-    { printf("for\n"); ;}
+    { printf("for\n"); (yyval.nPtr) = (yyvsp[(1) - (1)].nPtr);;}
     break;
 
   case 12:
@@ -1761,7 +1761,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 81 "x.y"
-    { printf("if\n"); ;}
+    { printf("if\n"); (yyval.nPtr) = (yyvsp[(1) - (1)].nPtr);;}
     break;
 
   case 14:
@@ -1785,11 +1785,18 @@ yyreduce:
     { printf("func call\n"); ;}
     break;
 
+  case 17:
+
+/* Line 1455 of yacc.c  */
+#line 85 "x.y"
+    {(yyval.nPtr) = (yyvsp[(2) - (2)].nPtr);;}
+    break;
+
   case 23:
 
 /* Line 1455 of yacc.c  */
 #line 102 "x.y"
-    { (yyval.nPtr) = opr(CONST, 2, id((yyvsp[(3) - (6)].strVal), "const_var", (yyvsp[(2) - (6)].conType)), (yyvsp[(5) - (6)].nPtr)); ;}
+    { (yyval.nPtr) = opr(CONST, 2, id((yyvsp[(3) - (6)].strVal), constVariable, (yyvsp[(2) - (6)].conType)), (yyvsp[(5) - (6)].nPtr)); ;}
     break;
 
   case 24:
@@ -1797,10 +1804,10 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 105 "x.y"
     { if((yyvsp[(3) - (3)].nPtr)==NULL){
-																 id((yyvsp[(2) - (3)].strVal), "var", (yyvsp[(1) - (3)].conType));
+																 id((yyvsp[(2) - (3)].strVal), variable, (yyvsp[(1) - (3)].conType));
 																}
 															else{
-																 (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (3)].strVal), "var", (yyvsp[(1) - (3)].conType)), (yyvsp[(3) - (3)].nPtr)); 
+																 (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (3)].strVal), variable, (yyvsp[(1) - (3)].conType)), (yyvsp[(3) - (3)].nPtr)); 
 															}
 														;}
     break;
@@ -1830,7 +1837,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 120 "x.y"
-    { (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (4)].strVal), "var", (yyvsp[(1) - (4)].conType)), (yyvsp[(4) - (4)].nPtr)); ;}
+    { (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (4)].strVal), variable, (yyvsp[(1) - (4)].conType)), (yyvsp[(4) - (4)].nPtr)); ;}
     break;
 
   case 30:
@@ -2187,20 +2194,20 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 272 "x.y"
-    { printf("openbraces\n");;}
+    { printf("openbraces\n"); currentSymTable = startScope(tree);;}
     break;
 
   case 108:
 
 /* Line 1455 of yacc.c  */
 #line 274 "x.y"
-    { printf("closebraces\n");;}
+    { printf("closebraces\n"); symTablePrint(currentSymTable); currentSymTable = endScope(tree);;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2204 "x.tab.c"
+#line 2211 "x.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2447,19 +2454,16 @@ nodeType *con(conTypeEnum type, union Value value) {
     return p; 
 }
 
-nodeType *id(char*  label, char* type, conTypeEnum dataType) {
+nodeType *id(char*  label, Type type, conTypeEnum dataType) {
     nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
 	}
 	 
-	union Value  x;
-	x.intVal = 1;
-
-	int flag = symInsert(currentSymTable, label, type, x);
+	int flag = symInsert(currentSymTable, label, type, dataType);
 	
 	if(flag == -1){
-		printf("Redeclaration");
+		printf("\nRedeclaration\n");
 	}
 
 	p->type = typeId;
@@ -2480,12 +2484,13 @@ nodeType *getid(char* value) {
 	struct Symbol* sym= symLookup(currentSymTable, value);
 
 	if(sym == NULL){
-		printf("var not found");
+		printf("var not found\n");
 	}else{
      /* copy information */
 		p->type = typeId;
 		p->id.label = value;
 		p->id.symTablePtr = sym->myTable;
+		p->retType = sym->datatype;
 	}
 	 
     return p;
@@ -2511,24 +2516,25 @@ nodeType *opr(int oper, int nops, ...) {
         p->opr.op[i] = va_arg(ap, nodeType*);
     va_end(ap);
 	
-	if(oper==WHILE){
-		//printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
-	}
-	if(oper==DO){
-		printf("\nDOOOOOO\n %d \n %d\n",  p->opr.op[0]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal, p->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
-	}
+	// if(oper==WHILE){
+	// 	//printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
+	// }
+	// if(oper==DO){
+	// 	printf("\nDOOOOOO\n %d \n %d\n",  p->opr.op[0]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal, p->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
+	// }
 
-	/*if(oper==FOR){
-		printf("\nfor\n %c \n\n", p->opr.op[2]->opr.op[1]->opr.op[1]->opr.oper ); 
-	}*/
+	// /*if(oper==FOR){
+	// 	printf("\nfor\n %c \n\n", p->opr.op[2]->opr.op[1]->opr.op[1]->opr.oper ); 
+	// }*/
 
-	if(oper==IF){
-		printf("\nIFFFFFFFFF\n %d\n\n" , p->opr.op[1]->opr.op[0]->opr.op[1]->con.intVal );
-	}
+	// if(oper==IF){
+	// 	printf("\nIFFFFFFFFF\n %d\n\n" , p->opr.op[1]->opr.op[0]->opr.op[1]->con.intVal );
+	// }
 	
 	
 	//TODO: Semantic checks
 	oprSemanticChecks(p);
+
     return p;
  } 
 
@@ -2539,7 +2545,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nshit\n");
+			printf("\n+ - * / error\n");
 		}
 		
 	}
@@ -2552,7 +2558,7 @@ void oprSemanticChecks( nodeType* p){
 		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nshit\n");
+			printf("\n== != error\n");
 		}
 	}
 	// Check for < <= > >=
@@ -2562,7 +2568,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nshit\n");
+			printf("\n< > <= >= error\n");
 		}
 	}
 	// Check for & |
@@ -2571,7 +2577,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
 			p->retType = typebool;
 		}else{
-			printf("\nshit\n");
+			printf("\n| & error\n");
 		}
 	}
 	// CHeck for ~
@@ -2579,19 +2585,31 @@ void oprSemanticChecks( nodeType* p){
 		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nshit\n");
+			printf("\n~ error\n");
 		}
 	}
 	//Check for = (Assignment)
-	// else if (p->opr.oper == '='){	
-	// 	// Check types are equal in the left hand side is not a const
-	// 	if( (p->opr.op[0]->retType == p->opr.op[1]->retType) && 
-	// 	(p->opr.op[0]->type !=typeId ||(p->opr.op[0]->type == typeId && strcmp( symLookup(currentSymTable,p->opr.op[0]->id.label)->type,"const_var")!=0 && strcmp( symLookup(currentSymTable,p->opr.op[0]->id.label)->type,"const_array")!=0  ))){
-	// 		p->retType = p->opr.op[0]->retType;
-	// 	}else{
-	// 		printf("\nshit\n");
-	// 	}
-	// }
+	else if (p->opr.oper == '='){	
+		struct Symbol* symbol = symLookup(p->opr.op[0]->id.symTablePtr, p->opr.op[0]->id.label );
+		// Check types are equal and LHS is variable
+		if( (p->opr.op[0]->retType == p->opr.op[1]->retType) &&
+		symbol->type == variable){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\nassignment error\n");
+
+		}
+	}
+	// Check for constnt initialization
+	else if( p->opr.oper == CONST){
+		// Check types are equal
+		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\nconstant init error\n");
+
+		}
+	}
 
 }
 
@@ -2609,6 +2627,7 @@ int yyerror(char *msg) {
 int main(int argc, char * argv[]){
   tree = allocateSymTree();
   currentSymTable = startScope(tree);
+  
   yyin=fopen(argv[1],"r");
   yyparse();
 

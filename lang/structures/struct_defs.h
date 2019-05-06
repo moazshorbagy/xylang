@@ -1,13 +1,13 @@
 #ifndef STRUCT_DEFS
 #define STRUCT_DEFS
 #include <stdbool.h>
-#include "../header.h"
+
 
 #define TABLE_SIZE 20            // number of symbols per symbol table
 #define MAX_CHILDREN_IN_TABLE 20 // can be removed later
 
 // Structures required for symbol table
-
+typedef enum { typeint, typefloat, typestring, typebool, typevoid} conTypeEnum;
 typedef enum
 {
     variable,
@@ -30,9 +30,11 @@ struct Symbol
     char *label;
     Type type;
     conTypeEnum datatype;
-    union Value symValue;
+    union Value *symValue;
     char **args; // datatypes for function arguments
-    struct SymTable *myTable;
+    bool isInitialized;
+    bool isUsed;
+    struct SymTable *myTable; // the table where the symbol is stored
 };
 
 struct SymTable

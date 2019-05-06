@@ -15,7 +15,7 @@ int yyerror(char*);
 extern int yylex(); 
 //prototypes
 nodeType *con(conTypeEnum type,union Value);
-nodeType *id(char*  label, char* type, conTypeEnum dataType);
+nodeType *id(char*  label, Type type, conTypeEnum dataType);
 nodeType *getid(char* value);
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
@@ -71,18 +71,18 @@ stmts	: stmts stmt	{$$ = opr(';', 2, $1, $2);}
 		| stmt			{$$ = $1;}
 		;
 
-stmt	: decConstant { printf("decConst\n"); }
-		| decVar { printf("decVar\n"); }
-		| assign ';' { printf("assignment\n"); }
-		| whilestmt { printf("while\n"); }
-		| dowhilestmt { printf("do\n"); }
-		| forloopstmt  { printf("for\n"); }
-		| switchcase { printf("switch\n"); }
-		| matched { printf("if\n"); }
-		| decArr { printf("dec array\n"); }
-		| return { printf("return\n"); }
-		| funccall ';' { printf("func call\n"); }
-		| openbraces stmtornull
+stmt	: decConstant 				{ printf("decConst\n"); $$ = $1; }
+		| decVar 					{ printf("decVar\n"); $$ = $1;}
+		| assign ';' 				{ printf("assignment\n");$$ = $1; }
+		| whilestmt 				{ printf("while\n"); $$ = $1;}
+		| dowhilestmt 				{ printf("do\n"); $$ = $1;}
+		| forloopstmt  				{ printf("for\n"); $$ = $1;}
+		| switchcase 				{ printf("switch\n"); }
+		| matched 					{ printf("if\n"); $$ = $1;}
+		| decArr 					{ printf("dec array\n"); }
+		| return 					{ printf("return\n"); }
+		| funccall ';' 				{ printf("func call\n"); }
+		| openbraces stmtornull		{$$ = $2;}
 		;
 	
 
@@ -99,14 +99,14 @@ multipleExpr	: expr
 				| multipleExpr ',' expr
 				;
 
-decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, "const_var", $2), $5); }
+decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, constVariable, $2), $5); }
 			;
 
 decVar	: type IDENTIFIER withVal						{ if($3==NULL){
-																 id($2, "var", $1);
+																 id($2, variable, $1);
 																}
 															else{
-																 $$ = opr('=', 2, id($2, "var", $1), $3); 
+																 $$ = opr('=', 2, id($2, variable, $1), $3); 
 															}
 														}
 		;
@@ -117,7 +117,7 @@ withVal	: ';'				{$$ = NULL;}
 		
 
 assigndec	: IDENTIFIER '=' expr 				{ $$ = opr('=',2,getid($1),$3);}
-	 		| type IDENTIFIER '=' expr			{ $$ = opr('=', 2, id($2, "var", $1), $4); }
+	 		| type IDENTIFIER '=' expr			{ $$ = opr('=', 2, id($2, variable, $1), $4); }
 			| IDENTIFIER '[' expr ']' '=' expr	
 			;
 
@@ -269,9 +269,9 @@ return	: RETURN expr ';'
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 
-openbraces : '{'					  { printf("openbraces\n");} 
+openbraces : '{'					  { printf("openbraces\n"); currentSymTable = startScope(tree);} 
 	;
-closebraces : '}'					  { printf("closebraces\n");}
+closebraces : '}'					  { printf("closebraces\n"); symTablePrint(currentSymTable); currentSymTable = endScope(tree);}
 	; 
 
 %%
@@ -308,19 +308,16 @@ nodeType *con(conTypeEnum type, union Value value) {
     return p; 
 }
 
-nodeType *id(char*  label, char* type, conTypeEnum dataType) {
+nodeType *id(char*  label, Type type, conTypeEnum dataType) {
     nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
 	}
 	 
-	union Value  x;
-	x.intVal = 1;
-
-	int flag = symInsert(currentSymTable, label, type, x);
+	int flag = symInsert(currentSymTable, label, type, dataType);
 	
 	if(flag == -1){
-		printf("Redeclaration");
+		printf("\nRedeclaration\n");
 	}
 
 	p->type = typeId;
@@ -347,6 +344,7 @@ nodeType *getid(char* value) {
 		p->type = typeId;
 		p->id.label = value;
 		p->id.symTablePtr = sym->myTable;
+		p->retType = sym->datatype;
 	}
 	 
     return p;
@@ -372,24 +370,25 @@ nodeType *opr(int oper, int nops, ...) {
         p->opr.op[i] = va_arg(ap, nodeType*);
     va_end(ap);
 	
-	if(oper==WHILE){
-		//printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
-	}
-	if(oper==DO){
-		printf("\nDOOOOOO\n %d \n %d\n",  p->opr.op[0]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal, p->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
-	}
+	// if(oper==WHILE){
+	// 	//printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
+	// }
+	// if(oper==DO){
+	// 	printf("\nDOOOOOO\n %d \n %d\n",  p->opr.op[0]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal, p->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
+	// }
 
-	/*if(oper==FOR){
-		printf("\nfor\n %c \n\n", p->opr.op[2]->opr.op[1]->opr.op[1]->opr.oper ); 
-	}*/
+	// /*if(oper==FOR){
+	// 	printf("\nfor\n %c \n\n", p->opr.op[2]->opr.op[1]->opr.op[1]->opr.oper ); 
+	// }*/
 
-	if(oper==IF){
-		printf("\nIFFFFFFFFF\n %d\n\n" , p->opr.op[1]->opr.op[0]->opr.op[1]->con.intVal );
-	}
+	// if(oper==IF){
+	// 	printf("\nIFFFFFFFFF\n %d\n\n" , p->opr.op[1]->opr.op[0]->opr.op[1]->con.intVal );
+	// }
 	
 	
 	//TODO: Semantic checks
 	oprSemanticChecks(p);
+
     return p;
  } 
 
@@ -400,7 +399,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nshit\n");
+			printf("\n+ - * / error\n");
 		}
 		
 	}
@@ -413,7 +412,7 @@ void oprSemanticChecks( nodeType* p){
 		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nshit\n");
+			printf("\n== != error\n");
 		}
 	}
 	// Check for < <= > >=
@@ -423,7 +422,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nshit\n");
+			printf("\n< > <= >= error\n");
 		}
 	}
 	// Check for & |
@@ -432,7 +431,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
 			p->retType = typebool;
 		}else{
-			printf("\nshit\n");
+			printf("\n| & error\n");
 		}
 	}
 	// CHeck for ~
@@ -440,19 +439,31 @@ void oprSemanticChecks( nodeType* p){
 		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nshit\n");
+			printf("\n~ error\n");
 		}
 	}
 	//Check for = (Assignment)
-	// else if (p->opr.oper == '='){	
-	// 	// Check types are equal in the left hand side is not a const
-	// 	if( (p->opr.op[0]->retType == p->opr.op[1]->retType) && 
-	// 	(p->opr.op[0]->type !=typeId ||(p->opr.op[0]->type == typeId && strcmp( symLookup(currentSymTable,p->opr.op[0]->id.label)->type,"const_var")!=0 && strcmp( symLookup(currentSymTable,p->opr.op[0]->id.label)->type,"const_array")!=0  ))){
-	// 		p->retType = p->opr.op[0]->retType;
-	// 	}else{
-	// 		printf("\nshit\n");
-	// 	}
-	// }
+	else if (p->opr.oper == '='){	
+		struct Symbol* symbol = symLookup(p->opr.op[0]->id.symTablePtr, p->opr.op[0]->id.label );
+		// Check types are equal and LHS is variable
+		if( (p->opr.op[0]->retType == p->opr.op[1]->retType) &&
+		symbol->type == variable){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\nassignment error\n");
+
+		}
+	}
+	// Check for constnt initialization
+	else if( p->opr.oper == CONST){
+		// Check types are equal
+		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\nconstant init error\n");
+
+		}
+	}
 
 }
 
@@ -470,6 +481,7 @@ int yyerror(char *msg) {
 int main(int argc, char * argv[]){
   tree = allocateSymTree();
   currentSymTable = startScope(tree);
+  
   yyin=fopen(argv[1],"r");
   yyparse();
 
