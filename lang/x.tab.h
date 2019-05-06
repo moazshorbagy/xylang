@@ -61,10 +61,11 @@
      RETURN = 277,
      FUNCTION = 278,
      MAIN = 279,
-     INT = 280,
-     FLOAT = 281,
-     STRING = 282,
-     BOOL = 283
+     CASE_JOIN = 280,
+     INT = 281,
+     FLOAT = 282,
+     STRING = 283,
+     BOOL = 284
    };
 #endif
 
@@ -87,7 +88,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 91 "x.tab.h"
+#line 92 "x.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

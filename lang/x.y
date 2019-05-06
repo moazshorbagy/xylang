@@ -44,6 +44,7 @@ struct Tree* tree;
 %token <strVal> IDENTIFIER
 %token <boolVal> BOOL_VAL
 %token CONST  COND_EQ  COND_GREQ COND_LSEQ COND_NEQ WHILE IF ELSE DO FOR SWITCH CASE DEFAULT VOID RETURN FUNCTION MAIN 
+%token CASE_JOIN
 
 %start  program
 // Associativity rules
@@ -54,7 +55,7 @@ struct Tree* tree;
 
 //%type
 
-%type <nPtr>  expr cond assign stmtornull whilestmt stmts stmt dowhilestmt assigndec forloopcont forloopstmt ifcont matched decConstant withVal decVar
+%type <nPtr>  expr cond assign stmtornull whilestmt stmts stmt dowhilestmt assigndec forloopcont forloopstmt ifcont matched decConstant withVal decVar stmtornull2 switching cases switchcase
 %type <conType> type
 %token <conType> INT
 %token <conType> FLOAT
@@ -73,11 +74,11 @@ stmts	: stmts stmt	{$$ = opr(';', 2, $1, $2);}
 
 stmt	: decConstant 				{ printf("decConst\n"); $$ = $1; }
 		| decVar 					{ printf("decVar\n"); $$ = $1;}
-		| assign ';' 				{ printf("assignment\n");$$ = $1; }
+		| assign ';' 				{ printf("assignment\n"); $$ = $1; }
 		| whilestmt 				{ printf("while\n"); $$ = $1;}
 		| dowhilestmt 				{ printf("do\n"); $$ = $1;}
 		| forloopstmt  				{ printf("for\n"); $$ = $1;}
-		| switchcase 				{ printf("switch\n"); }
+		| switchcase 				{ printf("switch\n"); $$ = $1;}
 		| matched 					{ printf("if\n"); $$ = $1;}
 		| decArr 					{ printf("dec array\n"); }
 		| return 					{ printf("return\n"); }
@@ -157,18 +158,21 @@ forloopcont	: assign ')' openbraces  stmtornull						{ $$ = opr(';', 2, $4, $1);
 
 	/* Switch-case */
 
-switchcase	: SWITCH '(' expr ')' openbraces  cases
+switchcase	: SWITCH '(' expr ')' openbraces  cases					{ $$ = opr(SWITCH, 2, $3, $6);}
 			;
 
-cases		: switching nodef | closebraces | DEFAULT ':' stmtornull
+cases		: switching closebraces									{ $$ = $1;}
+			;
+/*			| closebraces 
+			| DEFAULT ':' stmtornull
 			;
 
 nodef	: DEFAULT ':' stmtornull
 		| closebraces
-		;
+		;*/
 
-switching	: switching CASE '(' expr ')' stmtornull2
-			| CASE '(' expr ')' stmtornull2
+switching	: switching CASE '(' expr ')' stmtornull2				{ $$ = opr(CASE_JOIN,2, $1, opr(CASE, 2, $4, $6));}
+			| CASE '(' expr ')' stmtornull2							{ $$ = opr(CASE, 2, $3, $5);}
 			;
 
 
@@ -218,8 +222,8 @@ stmtornull	: stmts closebraces	{$$ = $1;}
 			| closebraces		{$$ = NULL;}
 			;
 			
-stmtornull2 : ':' stmts			
-			| ':'				
+stmtornull2 : ':' stmts			{$$ = $2;}
+			| ':'				{$$ = NULL;}
 			;
 
 	/* Types */
@@ -400,6 +404,7 @@ void oprSemanticChecks( nodeType* p){
 			p->retType = p->opr.op[0]->retType;
 		}else{
 			printf("\n+ - * / error\n");
+			yyerror("wrong");
 		}
 		
 	}
@@ -464,6 +469,30 @@ void oprSemanticChecks( nodeType* p){
 
 		}
 	}
+	// Check CASE ==> return the type of the expr
+	else if (p->opr.oper == CASE){
+		p->retType = p->opr.op[0]->retType;
+	}
+	// Check for CASE_JOIN that expr types are the same
+	else if(p->opr.oper == CASE_JOIN){
+		// Check types are equal
+		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
+			p->retType = p->opr.op[0]->retType;
+		}else{
+			printf("\ncases types not equal\n");
+		}
+	}
+	// Check for SWITCH : expr type is same as inner expressions
+	else if(p->opr.oper == SWITCH){
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+			p->retType = typevoid;
+		}else{
+			printf("\nswitch and cases types not equal\n");
+		}
+	}	
+	else{
+		p->retType = typevoid;
+	}
 
 }
 
@@ -473,10 +502,7 @@ void oprSemanticChecks( nodeType* p){
 /////////////////////////////////////////////////////////
 extern FILE *yyin;
 
-int yyerror(char *msg) {
-  fprintf(stderr,"%s\n",msg);
-  exit(1);
-}
+
 
 int main(int argc, char * argv[]){
   tree = allocateSymTree();

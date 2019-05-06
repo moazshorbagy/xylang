@@ -4,9 +4,11 @@
 
 #include <string.h>
 #include <stdlib.h>
-void yyerror(char *);
+int yyerror(char *);
+int yylineno ; 
 %}
 %pointer
+%option yylineno
 %%
 
 	/* Constants */
@@ -77,7 +79,10 @@ void yyerror(char *);
 .   yyerror("invalid character");
 
 %%
-
+int yyerror(char *msg) {
+  fprintf(stderr,"%s at line %d\n",msg,yylineno);
+  exit(1);
+}
 int yywrap(void) {
     return 1;
 }
