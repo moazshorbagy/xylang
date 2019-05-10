@@ -62,7 +62,7 @@
      FUNCTION = 278,
      MAIN = 279,
      CASE_JOIN = 280,
-     kjhs = 281,
+     DEC = 281,
      INT = 282,
      FLOAT = 283,
      STRING = 284,

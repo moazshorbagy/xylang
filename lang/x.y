@@ -47,7 +47,7 @@ struct Tree* tree;
 %token <strVal> IDENTIFIER
 %token <boolVal> BOOL_VAL
 %token CONST  COND_EQ  COND_GREQ COND_LSEQ COND_NEQ WHILE IF ELSE DO FOR SWITCH CASE DEFAULT VOID RETURN FUNCTION MAIN 
-%token CASE_JOIN
+%token CASE_JOIN DEC
 
 %start  program
 // Associativity rules
@@ -107,9 +107,12 @@ decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, c
 			;
 
 decVar	: type IDENTIFIER withVal						{ if($3==NULL){
-																$$=id($2, variable, $1, false);
-																}else{
-																$$ = opr('=', 2, id($2, variable, $1, true), $3); 
+																
+																$$=opr(DEC,1,id($2, variable, $1,false));
+																}
+															else{
+																$$=opr(DEC,2,id($2, variable,$1,false),opr('=', 2, id($2, variable, $1,true), $3));
+
 															}
 														}
 		;
