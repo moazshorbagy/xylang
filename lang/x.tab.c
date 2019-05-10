@@ -89,7 +89,7 @@ extern int yylex();
 //prototypes
 nodeType *con(conTypeEnum type,union Value);
 nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized);
-nodeType *getid(char* value, bool , bool );
+nodeType *getid(char* value);
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
 int ex(nodeType *p,int lbl1,int lbl2);
@@ -525,15 +525,15 @@ static const yytype_uint16 yyrline[] =
 {
        0,    70,    70,    71,    74,    75,    78,    79,    80,    81,
       82,    83,    84,    85,    86,    87,    88,    89,    95,    98,
-      99,   102,   103,   106,   110,   125,   126,   130,   131,   132,
-     138,   139,   145,   148,   149,   155,   158,   161,   164,   165,
-     171,   174,   184,   185,   191,   192,   193,   194,   195,   196,
-     197,   198,   199,   200,   201,   202,   203,   204,   205,   206,
-     207,   208,   209,   210,   211,   214,   215,   216,   217,   218,
-     219,   220,   221,   222,   223,   224,   225,   226,   227,   231,
-     232,   235,   236,   241,   242,   243,   244,   250,   251,   254,
-     255,   256,   257,   260,   261,   264,   265,   268,   269,   272,
-     273,   276,   277,   286,   288
+      99,   102,   103,   106,   109,   121,   122,   126,   127,   128,
+     134,   135,   141,   144,   145,   151,   154,   157,   160,   161,
+     167,   170,   180,   181,   187,   188,   189,   190,   191,   192,
+     193,   194,   195,   196,   197,   198,   199,   200,   201,   202,
+     203,   204,   205,   206,   207,   210,   211,   212,   213,   214,
+     215,   216,   217,   218,   219,   220,   221,   222,   223,   227,
+     228,   231,   232,   237,   238,   239,   240,   246,   247,   250,
+     251,   252,   253,   256,   257,   260,   261,   264,   265,   268,
+     269,   272,   273,   282,   284
 };
 #endif
 
@@ -1791,24 +1791,20 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 106 "x.y"
-    { 	id((yyvsp[(3) - (6)].strVal), constVariable, (yyvsp[(2) - (6)].conType), true);
-															(yyval.nPtr) = opr(CONST, 2, getid((yyvsp[(3) - (6)].strVal), true, false), (yyvsp[(5) - (6)].nPtr)); ;}
+    { (yyval.nPtr) = opr(CONST, 2, id((yyvsp[(3) - (6)].strVal), constVariable, (yyvsp[(2) - (6)].conType), true), (yyvsp[(5) - (6)].nPtr)); ;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 110 "x.y"
-    { if((yyvsp[(3) - (3)].nPtr)==NULL)
-															{
+#line 109 "x.y"
+    { if((yyvsp[(3) - (3)].nPtr)==NULL){
 																
-																id((yyvsp[(2) - (3)].strVal), variable, (yyvsp[(1) - (3)].conType),false);
-																(yyval.nPtr)=opr(DEC,1,getid((yyvsp[(2) - (3)].strVal), false, false));
-																
-															}
+																(yyval.nPtr)=opr(DEC,1,id((yyvsp[(2) - (3)].strVal), variable, (yyvsp[(1) - (3)].conType),false));
+																}
 															else{
 																id((yyvsp[(2) - (3)].strVal), variable,(yyvsp[(1) - (3)].conType),true);
-																(yyval.nPtr)=opr(DEC,2,getid((yyvsp[(2) - (3)].strVal), true, false),opr('=', 2, getid((yyvsp[(2) - (3)].strVal), true, false), (yyvsp[(3) - (3)].nPtr)));
+																(yyval.nPtr)=opr(DEC,2,getid((yyvsp[(2) - (3)].strVal)),opr('=', 2, getid((yyvsp[(2) - (3)].strVal)), (yyvsp[(3) - (3)].nPtr)));
 
 															}
 														;}
@@ -1817,441 +1813,441 @@ yyreduce:
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 125 "x.y"
+#line 121 "x.y"
     {(yyval.nPtr) = NULL;;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 126 "x.y"
+#line 122 "x.y"
     {(yyval.nPtr) = (yyvsp[(2) - (3)].nPtr);;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 130 "x.y"
-    { (yyval.nPtr) = opr('=',2,getid((yyvsp[(1) - (3)].strVal), true, false),(yyvsp[(3) - (3)].nPtr));;}
+#line 126 "x.y"
+    { (yyval.nPtr) = opr('=',2,getid((yyvsp[(1) - (3)].strVal)),(yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 131 "x.y"
+#line 127 "x.y"
     { (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (4)].strVal), variable, (yyvsp[(1) - (4)].conType), true), (yyvsp[(4) - (4)].nPtr)); ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 138 "x.y"
-    { (yyval.nPtr) = opr('=',2,getid((yyvsp[(1) - (3)].strVal), true, false),(yyvsp[(3) - (3)].nPtr));;}
+#line 134 "x.y"
+    { (yyval.nPtr) = opr('=',2,getid((yyvsp[(1) - (3)].strVal)),(yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 145 "x.y"
+#line 141 "x.y"
     { (yyval.nPtr) = opr(IF, 2,  (yyvsp[(3) - (5)].nPtr), (yyvsp[(5) - (5)].nPtr));;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 148 "x.y"
+#line 144 "x.y"
     { (yyval.nPtr) = (yyvsp[(2) - (2)].nPtr);;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 149 "x.y"
+#line 145 "x.y"
     { (yyval.nPtr) = opr(ELSE, 2, (yyvsp[(2) - (5)].nPtr), (yyvsp[(5) - (5)].nPtr));;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 155 "x.y"
+#line 151 "x.y"
     { (yyval.nPtr) = opr(WHILE, 2, (yyvsp[(3) - (6)].nPtr), (yyvsp[(6) - (6)].nPtr));;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 158 "x.y"
+#line 154 "x.y"
     { (yyval.nPtr) = opr(DO, 2, (yyvsp[(3) - (8)].nPtr), (yyvsp[(6) - (8)].nPtr));;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 161 "x.y"
+#line 157 "x.y"
     { (yyval.nPtr) = opr(FOR, 3, (yyvsp[(3) - (7)].nPtr), (yyvsp[(5) - (7)].nPtr), (yyvsp[(7) - (7)].nPtr));;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 164 "x.y"
+#line 160 "x.y"
     { (yyval.nPtr) = opr(';', 2, (yyvsp[(4) - (4)].nPtr), (yyvsp[(1) - (4)].nPtr));;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 165 "x.y"
+#line 161 "x.y"
     { (yyval.nPtr) = (yyvsp[(3) - (3)].nPtr);;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 171 "x.y"
+#line 167 "x.y"
     { (yyval.nPtr) = opr(SWITCH, 2, (yyvsp[(3) - (6)].nPtr), (yyvsp[(6) - (6)].nPtr));;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 174 "x.y"
+#line 170 "x.y"
     { (yyval.nPtr) = (yyvsp[(1) - (2)].nPtr);;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 184 "x.y"
+#line 180 "x.y"
     { (yyval.nPtr) = opr(CASE_JOIN,2, (yyvsp[(1) - (6)].nPtr), opr(CASE, 2, (yyvsp[(4) - (6)].nPtr), (yyvsp[(6) - (6)].nPtr)));;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 185 "x.y"
+#line 181 "x.y"
     { (yyval.nPtr) = opr(CASE, 2, (yyvsp[(3) - (5)].nPtr), (yyvsp[(5) - (5)].nPtr));;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 191 "x.y"
+#line 187 "x.y"
     {union Value x; x.intVal=(yyvsp[(1) - (1)].intVal); (yyval.nPtr)=con(typeint,x);;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 192 "x.y"
+#line 188 "x.y"
     {union Value x; x.floatVal=(yyvsp[(1) - (1)].floatVal); (yyval.nPtr)=con(typefloat,x);;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 193 "x.y"
+#line 189 "x.y"
     {union Value x; x.boolVal=(yyvsp[(1) - (1)].boolVal); (yyval.nPtr)=con(typebool,x);;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 194 "x.y"
+#line 190 "x.y"
     {union Value x; x.strVal=(yyvsp[(1) - (1)].strVal); (yyval.nPtr)=con(typestring,x);;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 195 "x.y"
+#line 191 "x.y"
     {(yyval.nPtr) = opr('~', 1, (yyvsp[(2) - (2)].nPtr));;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 196 "x.y"
-    {(yyval.nPtr) = getid((yyvsp[(1) - (1)].strVal), false, true);;}
+#line 192 "x.y"
+    {(yyval.nPtr) = getid((yyvsp[(1) - (1)].strVal));;}
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 197 "x.y"
+#line 193 "x.y"
     {;}
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 198 "x.y"
+#line 194 "x.y"
     {(yyval.nPtr) = opr('+', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 199 "x.y"
+#line 195 "x.y"
     {(yyval.nPtr) = opr('-', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 200 "x.y"
+#line 196 "x.y"
     {(yyval.nPtr) = opr('*', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 201 "x.y"
+#line 197 "x.y"
     {(yyval.nPtr) = opr('/', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 202 "x.y"
+#line 198 "x.y"
     {(yyval.nPtr) = opr('&', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 203 "x.y"
+#line 199 "x.y"
     {(yyval.nPtr) = opr('|', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 204 "x.y"
+#line 200 "x.y"
     {(yyval.nPtr) = opr('<', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 205 "x.y"
+#line 201 "x.y"
     {(yyval.nPtr) = opr(COND_GREQ, 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 206 "x.y"
+#line 202 "x.y"
     {(yyval.nPtr) = opr('>', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 207 "x.y"
+#line 203 "x.y"
     {(yyval.nPtr) = opr(COND_LSEQ, 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 208 "x.y"
+#line 204 "x.y"
     {(yyval.nPtr) = opr(COND_EQ, 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 209 "x.y"
+#line 205 "x.y"
     {(yyval.nPtr) = opr(COND_NEQ, 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 210 "x.y"
+#line 206 "x.y"
     {(yyval.nPtr) = (yyvsp[(2) - (3)].nPtr);;}
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 214 "x.y"
+#line 210 "x.y"
     {(yyval.nPtr) = opr('&', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 215 "x.y"
+#line 211 "x.y"
     {(yyval.nPtr) = opr('|', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 216 "x.y"
+#line 212 "x.y"
     {(yyval.nPtr) = opr('<', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 217 "x.y"
+#line 213 "x.y"
     {(yyval.nPtr) = opr(COND_GREQ, 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 218 "x.y"
+#line 214 "x.y"
     {(yyval.nPtr) = opr('>', 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 219 "x.y"
+#line 215 "x.y"
     {(yyval.nPtr) = opr(COND_LSEQ, 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 220 "x.y"
+#line 216 "x.y"
     {(yyval.nPtr) = opr(COND_EQ, 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 221 "x.y"
+#line 217 "x.y"
     {(yyval.nPtr) = opr(COND_NEQ, 2, (yyvsp[(1) - (3)].nPtr), (yyvsp[(3) - (3)].nPtr));;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 222 "x.y"
+#line 218 "x.y"
     {(yyval.nPtr)=(yyvsp[(2) - (3)].nPtr);;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 223 "x.y"
-    {(yyval.nPtr) = getid((yyvsp[(1) - (1)].strVal), false, true);;}
+#line 219 "x.y"
+    {(yyval.nPtr) = getid((yyvsp[(1) - (1)].strVal));;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 225 "x.y"
+#line 221 "x.y"
     {union Value x; x.boolVal=(yyvsp[(1) - (1)].boolVal); (yyval.nPtr)=con(typebool,x);;}
     break;
 
   case 77:
 
 /* Line 1455 of yacc.c  */
-#line 226 "x.y"
+#line 222 "x.y"
     {union Value x; x.intVal=(yyvsp[(1) - (1)].intVal); (yyval.nPtr)=con(typeint,x);;}
     break;
 
   case 78:
 
 /* Line 1455 of yacc.c  */
-#line 227 "x.y"
+#line 223 "x.y"
     {union Value x; x.floatVal=(yyvsp[(1) - (1)].floatVal); (yyval.nPtr)=con(typefloat,x);;}
     break;
 
   case 79:
 
 /* Line 1455 of yacc.c  */
-#line 231 "x.y"
+#line 227 "x.y"
     {(yyval.nPtr) = (yyvsp[(1) - (2)].nPtr);;}
     break;
 
   case 80:
 
 /* Line 1455 of yacc.c  */
-#line 232 "x.y"
+#line 228 "x.y"
     {(yyval.nPtr) = NULL;;}
     break;
 
   case 81:
 
 /* Line 1455 of yacc.c  */
-#line 235 "x.y"
+#line 231 "x.y"
     {(yyval.nPtr) = (yyvsp[(2) - (2)].nPtr);;}
     break;
 
   case 82:
 
 /* Line 1455 of yacc.c  */
-#line 236 "x.y"
+#line 232 "x.y"
     {(yyval.nPtr) = NULL;;}
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
-#line 241 "x.y"
+#line 237 "x.y"
     { (yyval.conType)=(yyvsp[(1) - (1)].conType);;}
     break;
 
   case 84:
 
 /* Line 1455 of yacc.c  */
-#line 242 "x.y"
+#line 238 "x.y"
     { (yyval.conType)=(yyvsp[(1) - (1)].conType);;}
     break;
 
   case 85:
 
 /* Line 1455 of yacc.c  */
-#line 243 "x.y"
+#line 239 "x.y"
     { (yyval.conType)=(yyvsp[(1) - (1)].conType);;}
     break;
 
   case 86:
 
 /* Line 1455 of yacc.c  */
-#line 244 "x.y"
+#line 240 "x.y"
     { (yyval.conType)=(yyvsp[(1) - (1)].conType);;}
     break;
 
   case 87:
 
 /* Line 1455 of yacc.c  */
-#line 250 "x.y"
+#line 246 "x.y"
     {printf("func");;}
     break;
 
   case 88:
 
 /* Line 1455 of yacc.c  */
-#line 251 "x.y"
+#line 247 "x.y"
     {printf("func");;}
     break;
 
   case 103:
 
 /* Line 1455 of yacc.c  */
-#line 286 "x.y"
-    { currentSymTable = startScope(tree);;}
+#line 282 "x.y"
+    { printf("openbraces\n"); currentSymTable = startScope(tree);;}
     break;
 
   case 104:
 
 /* Line 1455 of yacc.c  */
-#line 288 "x.y"
-    { currentSymTable = endScope(tree);;}
+#line 284 "x.y"
+    { printf("closebraces\n"); symTablePrint(currentSymTable); currentSymTable = endScope(tree);;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2255 "x.tab.c"
+#line 2251 "x.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2463,7 +2459,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 291 "x.y"
+#line 287 "x.y"
 
 
 /////////////////////////////////////////////////////////
@@ -2499,9 +2495,7 @@ nodeType *con(conTypeEnum type, union Value value) {
 }
 
 nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized) {
-    
-	
-	nodeType *p;     /* allocate node */
+    nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
 	}
@@ -2509,7 +2503,7 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized)
 	int flag = symInsert(currentSymTable, label, type, dataType);
 	
 	if(flag == -1){
-		yyerror("\nRedeclaration\n");
+		printf("\nRedeclaration\n");
 	}
 
 	p->type = typeId;
@@ -2521,20 +2515,16 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized)
 	 return p;
  } 
 
-nodeType *getid(char* value, bool setInitilized, bool setUsed) {
+nodeType *getid(char* value) {
 	
     nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL)
          yyerror("out of memory");
-
-	// Update the variable with initializtaion/usage info
-	symUpdate(currentSymTable, value, setInitilized, setUsed, NULL);
-	
-	// look up the symbol table to get values
+	//look up the symbol table to get values
 	struct Symbol* sym= symLookup(currentSymTable, value);
 
 	if(sym == NULL){
-		yyerror("var not found");
+		printf("var not found\n");
 	}else{
      /* copy information */
 		p->type = typeId;
@@ -2566,49 +2556,37 @@ nodeType *opr(int oper, int nops, ...) {
         p->opr.op[i] = va_arg(ap, nodeType*);
     va_end(ap);
 	
+	// if(oper==WHILE){
+	// 	//printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
+	// }
+	// if(oper==DO){
+	// 	printf("\nDOOOOOO\n %d \n %d\n",  p->opr.op[0]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal, p->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
+	// }
+
+	// /*if(oper==FOR){
+	// 	printf("\nfor\n %c \n\n", p->opr.op[2]->opr.op[1]->opr.op[1]->opr.oper ); 
+	// }*/
+
+	// if(oper==IF){
+	// 	printf("\nIFFFFFFFFF\n %d\n\n" , p->opr.op[1]->opr.op[0]->opr.op[1]->con.intVal );
+	// }
+	
+	
+	//TODO: Semantic checks
 	oprSemanticChecks(p);
 
     return p;
  } 
 
 void oprSemanticChecks( nodeType* p){
-
-	// Check for usage of uninitialized variables
-	// Check the first operand
-	// Different from second operand that it may be initially uninitialized in an assignment or const declaration
-	if(p->opr.op[0]->type == typeId && p->opr.oper != '=' && p->opr.oper != CONST && p->opr.oper != DEC && symLookup(currentSymTable, p->opr.op[0]->id.label)->isInitialized == false ){
-		char message [20];
-		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[0]->id.label );
-		yyerror(message);
-	}
 	
-	
-	if(p->opr.nops > 1 && p->opr.op[1]->type == typeId && symLookup(currentSymTable, p->opr.op[1]->id.label)->isInitialized == false ){
-		char message [20];
-		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
-		yyerror(message);
-	}
-
 	// Arithmetic check : types are same and are numbers //
 	if(p->opr.oper == '+' || p->opr.oper == '-' || p->opr.oper == '*' || p->opr.oper == '/' ){
-		
-		// Check types are same
-		if(p->opr.op[0]->retType == p->opr.op[1]->retType) {
-			
-			// Check type is integer or float
-			if((p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
-				p->retType = p->opr.op[0]->retType;
-			}else{
-				char message [50];
-				sprintf	(message, "(%c) usage error :  unallowed types", p->opr.oper );
-				yyerror(message);
-			}
+		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
+			p->retType = p->opr.op[0]->retType;
 		}else{
-			
-			char message [50];
-			sprintf	(message, "(%c) usage error :  type mismatch", p->opr.oper );
-			yyerror(message);
-			
+			printf("\n+ - * / error");
+			yyerror("wrong");
 		}
 		
 	}
@@ -2616,106 +2594,60 @@ void oprSemanticChecks( nodeType* p){
 	// Logical expressions //
 	// Check for == or != 
 	else if( p->opr.oper == COND_EQ || p->opr.oper == COND_NEQ){
-		
-		// Check type mismatch
-		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
-			
-			// Check types are bool, int or float
-			if(p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool){
-				p->retType = typebool;
-			}else{
-				char message [50];
-				sprintf	(message, "(%s) usage error :  unallowed types", p->opr.oper == COND_EQ ? "==" : "!=" );
-				yyerror(message);
-			}
-		} 	
-		else{
-
-			char message [50];
-			sprintf	(message, "(%s) usage error : type mismatch", p->opr.oper == COND_EQ ? "==" : "!=" );
-			yyerror(message);
+		// Check types equal and are numbers or booleans
+		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint 
+		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
+			p->retType = typebool;
+		}else{
+			yyerror("\n== != error");
 		}
 	}
-
 	// Check for < <= > >=
 	else if( p->opr.oper == '<' || p->opr.oper == '>' || p->opr.oper == COND_GREQ 
 	|| p->opr.oper == COND_LSEQ ){
-		// Check types equal
-		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
-
-			// Check types are integer or float
-			if(p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat){
-				p->retType = typebool;
-			}else{
-				char message [50];
-				sprintf	(message, "(%s) usage error :  unallowed types", p->opr.oper == '<' ? "<" : (p->opr.oper=='>' ? ">" : (p->opr.oper == COND_GREQ ? ">=" : "<=" )));
-				yyerror(message);
-			}
-
+		// Check types equal and are numbers
+		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
+			p->retType = typebool;
 		}else{
-			char message [50];
-			sprintf	(message, "(%s) usage error : type mismatch",  p->opr.oper == '<' ? "<" : (p->opr.oper=='>' ? ">" : (p->opr.oper == COND_GREQ ? ">=" : "<=" )));
-			yyerror(message);
+			yyerror("\n< > <= >= error");
 		}
 	}
-
 	// Check for & |
 	else if( p->opr.oper == '|' || p->opr.oper == '&'){
-		// Check types are equal
-		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
-			// Check type is boolean
-			if(p->opr.op[1]->retType == typebool){
-				p->retType = typebool;
-			}else{
-				char message [50];
-				sprintf	(message, "(%c) usage error :  unallowed types", p->opr.oper);
-				yyerror(message);
-			}
+		// Check types are equal and booleans
+		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
+			p->retType = typebool;
 		}else{
-			char message [50];
-			sprintf	(message, "(%c) usage error : type mismatch", p->opr.oper);
-			yyerror(message);
+			yyerror("\n| & error");
 		}
 	}
-
 	// CHeck for ~
 	else if (p->opr.oper == '~'){
-		// Check type is integer or float
 		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			char message [50];
-			sprintf	(message, "(%c) usage error : unallowed type", p->opr.oper);
-			yyerror(message);
+			yyerror("\n~ error");
 		}
 	}
-
-	// Check for = (Assignment)
+	//Check for = (Assignment)
 	else if (p->opr.oper == '='){	
 		struct Symbol* symbol = symLookup(p->opr.op[0]->id.symTablePtr, p->opr.op[0]->id.label );
 		// Check types are equal and LHS is variable
-		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
-			if(symbol->type == variable){
-				p->retType = p->opr.op[0]->retType;
-			}else{
-				char message [50];
-				sprintf	(message, "(=) usage error : attempt to change constant \"%s\"", p->opr.op[0]->id.label);
-				yyerror(message);
-			}
+		if( (p->opr.op[0]->retType == p->opr.op[1]->retType) &&
+		symbol->type == variable){
+			p->retType = p->opr.op[0]->retType;
 		}else{
-			yyerror("(=) usage error : type mismatch");
+			yyerror("\nassignment error");
+
 		}
 	}
-
 	// Check for constnt initialization
 	else if( p->opr.oper == CONST){
 		// Check types are equal
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			char message [50];
-			sprintf	(message, "(=) usage error : type mismatch");
-			yyerror(message);
+			yyerror("\nconstant init error");
 
 		}
 	}

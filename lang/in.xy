@@ -1,10 +1,7 @@
 
 main {
-  const bool y=true;
   
-   bool z = true;
-  z =   y;
-
-  
+  string y="hi";
+  //bool x =  y==0 & (y>0 | y!=5);
   
 }	
