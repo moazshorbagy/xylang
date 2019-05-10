@@ -1,13 +1,7 @@
 
 main {
   
-  int y=0;
-  switch(y){
-	  case (7+0):
-      int x=3;
-
-    case(3+2*4):
-      int y=33;
-  }
-
+  string y="hi";
+  //bool x =  y==0 & (y>0 | y!=5);
+  
 }	
