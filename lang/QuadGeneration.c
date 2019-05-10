@@ -356,25 +356,8 @@ int ex(nodeType *p, int lbl1, int lbl2)
                 }
                 else
                 {
-                    bool declared=false;
-                    if (p->opr.op[1]->type == typeOpr)
-                    {
-                        ex(p->opr.op[1], lbl1, lbl2);
-                        declared=true;
-                    }
-                    printf("DECVAR");
-                    ex(p->opr.op[0], lbl1, lbl2);
-                    if(declared)
-                    {
-                        int tempdec=pop(2);
-                        printf(" Temp%d", tempdec);
-                    }
-                    else
-                    {
-                        ex(p->opr.op[1], lbl1, lbl2);
-                    }
                     
-                    
+                    ex(p->opr.op[1], lbl1, lbl2);
                 }
 
                 printf("\n");
