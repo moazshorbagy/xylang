@@ -111,7 +111,8 @@ decVar	: type IDENTIFIER withVal						{ if($3==NULL){
 																$$=opr(DEC,1,id($2, variable, $1,false));
 																}
 															else{
-																$$=opr(DEC,2,id($2, variable,$1,false),opr('=', 2, id($2, variable, $1,true), $3));
+																id($2, variable,$1,true);
+																$$=opr(DEC,2,getid($2),opr('=', 2, getid($2), $3));
 
 															}
 														}
