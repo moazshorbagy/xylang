@@ -18,7 +18,7 @@ extern int yylex();
 //prototypes
 nodeType *con(conTypeEnum type,union Value);
 nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized);
-nodeType *getid(char* value);
+nodeType *getid(char* value, bool , bool );
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
 int ex(nodeType *p,int lbl1,int lbl2);
@@ -109,11 +109,13 @@ decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, c
 decVar	: type IDENTIFIER withVal						{ if($3==NULL)
 															{
 																
-																$$=opr(DEC,1,id($2, variable, $1,false));
+																id($2, variable, $1,false);
+																$$=opr(DEC,1,getid($2, false, false));
+																
 															}
 															else{
 																id($2, variable,$1,true);
-																$$=opr(DEC,2,getid($2),opr('=', 2, getid($2), $3));
+																$$=opr(DEC,2,getid($2, true, false),opr('=', 2, getid($2, true, false), $3));
 
 															}
 														}
@@ -124,7 +126,7 @@ withVal	: ';'				{$$ = NULL;}
 		;
 		
 
-assigndec	: IDENTIFIER '=' expr 				{ $$ = opr('=',2,getid($1),$3);}
+assigndec	: IDENTIFIER '=' expr 				{ $$ = opr('=',2,getid($1, true, false),$3);}
 	 		| type IDENTIFIER '=' expr			{ $$ = opr('=', 2, id($2, variable, $1, true), $4); }
 			| IDENTIFIER '[' expr ']' '=' expr	
 			;
@@ -132,7 +134,7 @@ assigndec	: IDENTIFIER '=' expr 				{ $$ = opr('=',2,getid($1),$3);}
 
 	/* Assignments */
 	
-assign	: IDENTIFIER '=' expr					{ $$ = opr('=',2,getid($1),$3);}
+assign	: IDENTIFIER '=' expr					{ $$ = opr('=',2,getid($1, true, false),$3);}
 		| IDENTIFIER '[' expr ']' '=' expr
 		;
 
@@ -190,7 +192,7 @@ expr	: 	INT_VAL   			{union Value x; x.intVal=$1; $$=con(typeint,x);}
 		| BOOL_VAL				{union Value x; x.boolVal=$1; $$=con(typebool,x);}
 		| STRING_VAL			{union Value x; x.strVal=$1; $$=con(typestring,x);}
 		|'~'expr				{$$ = opr('~', 1, $2);}
-		| IDENTIFIER			{$$ = getid($1);}
+		| IDENTIFIER			{$$ = getid($1, false, true);}
 		| IDENTIFIER '[' expr ']'{}
 		| expr '+' expr	 		{$$ = opr('+', 2, $1, $3);}
 		| expr '-' expr  		{$$ = opr('-', 2, $1, $3);}
@@ -217,7 +219,7 @@ cond	: cond '&' cond 		{$$ = opr('&', 2, $1, $3);}
 		| cond COND_EQ cond		{$$ = opr(COND_EQ, 2, $1, $3);}
 		| cond COND_NEQ cond	{$$ = opr(COND_NEQ, 2, $1, $3);}
 		| '(' cond ')'			{$$=$2;}
-		| IDENTIFIER			{$$ = getid($1);}
+		| IDENTIFIER			{$$ = getid($1, false, true);}
 		| IDENTIFIER '[' expr ']'
 		| BOOL_VAL				{union Value x; x.boolVal=$1; $$=con(typebool,x);}
 		| INT_VAL				{union Value x; x.intVal=$1; $$=con(typeint,x);}
@@ -320,15 +322,17 @@ nodeType *con(conTypeEnum type, union Value value) {
 }
 
 nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized) {
-    nodeType *p;     /* allocate node */
+    
+	
+	nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
 	}
-	 
+	 printf("hiii2");
 	int flag = symInsert(currentSymTable, label, type, dataType);
-	
+	printf("hiii2");
 	if(flag == -1){
-		printf("\nRedeclaration\n");
+		yyerror("\nRedeclaration\n");
 	}
 
 	p->type = typeId;
@@ -340,16 +344,21 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized)
 	 return p;
  } 
 
-nodeType *getid(char* value) {
+nodeType *getid(char* value, bool setInitilized, bool setUsed) {
 	
     nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL)
          yyerror("out of memory");
-	//look up the symbol table to get values
+
+	// Update the variable with initializtaion/usage info
+	printf("hiii");
+	symUpdate(currentSymTable, value, setInitilized, setUsed, NULL);
+	printf("hiii");
+	// look up the symbol table to get values
 	struct Symbol* sym= symLookup(currentSymTable, value);
 
 	if(sym == NULL){
-		printf("var not found\n");
+		yyerror("var not found");
 	}else{
      /* copy information */
 		p->type = typeId;
@@ -404,14 +413,30 @@ nodeType *opr(int oper, int nops, ...) {
  } 
 
 void oprSemanticChecks( nodeType* p){
+
+	// Check for usage of uninitialized variables
+	// Check the first operand
+	// Different from second operand that it may be initially uninitialized in an assignment or const declaration
+	if(p->opr.op[0]->type == typeId && p->opr.oper != '=' && p->opr.oper != CONST && p->opr.oper != DEC && symLookup(currentSymTable, p->opr.op[0]->id.label)->isInitialized == false ){
+		char message [20];
+		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[0]->id.label );
+		yyerror(message);
+	}
 	
+	
+	if(p->opr.nops > 1 && p->opr.op[1]->type == typeId && symLookup(currentSymTable, p->opr.op[1]->id.label)->isInitialized == false ){
+		char message [20];
+		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
+		yyerror(message);
+	}
+
 	// Arithmetic check : types are same and are numbers //
 	if(p->opr.oper == '+' || p->opr.oper == '-' || p->opr.oper == '*' || p->opr.oper == '/' ){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n+ - * / error");
-			yyerror("wrong");
+			yyerror("\n+ - * / error");
+			
 		}
 		
 	}
@@ -434,7 +459,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = typebool;
 		}else{
-			yyerror("\n< > <= >= error");
+			yyerror("\n< > <= >= incompatible types error");
 		}
 	}
 	// Check for & |
@@ -443,7 +468,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
 			p->retType = typebool;
 		}else{
-			yyerror("\n| & error");
+			yyerror("\n| & incompatible types error");
 		}
 	}
 	// CHeck for ~
@@ -451,7 +476,7 @@ void oprSemanticChecks( nodeType* p){
 		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			yyerror("\n~ error");
+			yyerror("\n~ unallowed types error");
 		}
 	}
 	//Check for = (Assignment)

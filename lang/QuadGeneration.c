@@ -187,7 +187,7 @@ int ex(nodeType *p, int lbl1, int lbl2)
             {
                 ex(p->opr.op[1], lbl1, lbl2);
                 printf("\n");
-                printf("\tASSIGN %c ", p->opr.op[0]->id.label);
+                printf("\tASSIGN %s ", p->opr.op[0]->id.label);
                 int temp = pop(2);
                 printf(" Temp%d", temp);
                 tempexist = false;

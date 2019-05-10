@@ -104,8 +104,8 @@ int symUpdate(struct SymTable *table, char *label, bool isInitialized, bool isUs
     if (symbol == NULL)
         return -1;
 
-    symbol->isInitialized = isInitialized;
-    symbol->isUsed = isUsed;
+    symbol->isInitialized = isInitialized | symbol->isInitialized;
+    symbol->isUsed = isUsed | symbol->isUsed;
     if (value != NULL)
     {
         // used dynamic allocation to take control of the lifetime and be independent of input changes after the function call
@@ -124,7 +124,7 @@ void symTablePrint(struct SymTable *table)
         if (table->symTable[i] != NULL)
         {
             printf("label: %s index: %d", table->symTable[i]->label, i);
-            if (table->symTable[i]->isInitialized)
+           /* if (table->symTable[i]->isInitialized)
                 switch (table->symTable[i]->datatype)
                 {
                 case typeint:
@@ -145,7 +145,7 @@ void symTablePrint(struct SymTable *table)
 
                 default:
                     break;
-                }
+                }*/
             printf("\n");
         }
     }

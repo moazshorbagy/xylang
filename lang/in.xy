@@ -1,7 +1,17 @@
 
 main {
   
-  string y="hi";
-  //bool x =  y==0 & (y>0 | y!=5);
+  int x =5;
+  int y;
+  while(5<0){
+    int z;
+  }
+  while (x<0){
+    x = x +1;
+  }
+  for(x=0; x<5;x=x+1){
+    int z;
+    int m;
+  }
   
 }	
