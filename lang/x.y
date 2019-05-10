@@ -21,8 +21,9 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized)
 nodeType *getid(char* value, bool , bool );
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
-int ex(nodeType *p,int lbl1,int lbl2);
-
+int ex(nodeType *p,int lbl1,int lbl2,FILE *fp,int start);
+int start=0;
+FILE *fp;
 
 struct SymTable* currentSymTable;
 struct Tree* tree;
@@ -68,7 +69,7 @@ struct Tree* tree;
 %%
 
 program	: functions MAIN openbraces  stmts closebraces	{ printf("valid with functions\n");  }
-		| MAIN openbraces  stmts closebraces 			{ /*printf("valid\n")*/; ex($3,0,0);}
+		| MAIN openbraces  stmts closebraces 			{ /*printf("valid\n")*/; fp = fopen ("out.txt","w"); ex($3,0,0,fp,start);fclose (fp); }
 		;
 	
 stmts	: stmts stmt	{$$ = opr(';', 2, $1, $2);}	
