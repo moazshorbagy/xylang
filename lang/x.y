@@ -15,7 +15,7 @@ int yyerror(char*);
 extern int yylex(); 
 //prototypes
 nodeType *con(conTypeEnum type,union Value);
-nodeType *id(char*  label, Type type, conTypeEnum dataType);
+nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized);
 nodeType *getid(char* value);
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
@@ -100,14 +100,14 @@ multipleExpr	: expr
 				| multipleExpr ',' expr
 				;
 
-decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, constVariable, $2), $5); }
+decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, constVariable, $2, true), $5); }
 			;
 
 decVar	: type IDENTIFIER withVal						{ if($3==NULL){
-																 id($2, variable, $1);
+																 id($2, variable, $1, false);
 																}
 															else{
-																 $$ = opr('=', 2, id($2, variable, $1), $3); 
+																 $$ = opr('=', 2, id($2, variable, $1, true), $3); 
 															}
 														}
 		;
@@ -118,7 +118,7 @@ withVal	: ';'				{$$ = NULL;}
 		
 
 assigndec	: IDENTIFIER '=' expr 				{ $$ = opr('=',2,getid($1),$3);}
-	 		| type IDENTIFIER '=' expr			{ $$ = opr('=', 2, id($2, variable, $1), $4); }
+	 		| type IDENTIFIER '=' expr			{ $$ = opr('=', 2, id($2, variable, $1, true), $4); }
 			| IDENTIFIER '[' expr ']' '=' expr	
 			;
 
@@ -312,7 +312,7 @@ nodeType *con(conTypeEnum type, union Value value) {
     return p; 
 }
 
-nodeType *id(char*  label, Type type, conTypeEnum dataType) {
+nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized) {
     nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
@@ -403,7 +403,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n+ - * / error\n");
+			printf("\n+ - * / error");
 			yyerror("wrong");
 		}
 		
@@ -417,7 +417,7 @@ void oprSemanticChecks( nodeType* p){
 		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n== != error\n");
+			yyerror("\n== != error");
 		}
 	}
 	// Check for < <= > >=
@@ -427,7 +427,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n< > <= >= error\n");
+			yyerror("\n< > <= >= error");
 		}
 	}
 	// Check for & |
@@ -436,7 +436,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
 			p->retType = typebool;
 		}else{
-			printf("\n| & error\n");
+			yyerror("\n| & error");
 		}
 	}
 	// CHeck for ~
@@ -444,7 +444,7 @@ void oprSemanticChecks( nodeType* p){
 		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n~ error\n");
+			yyerror("\n~ error");
 		}
 	}
 	//Check for = (Assignment)
@@ -455,7 +455,7 @@ void oprSemanticChecks( nodeType* p){
 		symbol->type == variable){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nassignment error\n");
+			yyerror("\nassignment error");
 
 		}
 	}
@@ -465,7 +465,7 @@ void oprSemanticChecks( nodeType* p){
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nconstant init error\n");
+			yyerror("\nconstant init error");
 
 		}
 	}
@@ -479,7 +479,7 @@ void oprSemanticChecks( nodeType* p){
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\ncases types not equal\n");
+			yyerror("\ncases types not equal");
 		}
 	}
 	// Check for SWITCH : expr type is same as inner expressions
@@ -487,7 +487,7 @@ void oprSemanticChecks( nodeType* p){
 		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
 			p->retType = typevoid;
 		}else{
-			printf("\nswitch and cases types not equal\n");
+			yyerror("\nswitch and cases types not equal");
 		}
 	}	
 	else{

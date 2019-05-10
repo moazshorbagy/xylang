@@ -86,7 +86,7 @@ int yyerror(char*);
 extern int yylex(); 
 //prototypes
 nodeType *con(conTypeEnum type,union Value);
-nodeType *id(char*  label, Type type, conTypeEnum dataType);
+nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized);
 nodeType *getid(char* value);
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
@@ -1799,7 +1799,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 103 "x.y"
-    { (yyval.nPtr) = opr(CONST, 2, id((yyvsp[(3) - (6)].strVal), constVariable, (yyvsp[(2) - (6)].conType)), (yyvsp[(5) - (6)].nPtr)); ;}
+    { (yyval.nPtr) = opr(CONST, 2, id((yyvsp[(3) - (6)].strVal), constVariable, (yyvsp[(2) - (6)].conType), true), (yyvsp[(5) - (6)].nPtr)); ;}
     break;
 
   case 24:
@@ -1807,10 +1807,10 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 106 "x.y"
     { if((yyvsp[(3) - (3)].nPtr)==NULL){
-																 id((yyvsp[(2) - (3)].strVal), variable, (yyvsp[(1) - (3)].conType));
+																 id((yyvsp[(2) - (3)].strVal), variable, (yyvsp[(1) - (3)].conType), false);
 																}
 															else{
-																 (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (3)].strVal), variable, (yyvsp[(1) - (3)].conType)), (yyvsp[(3) - (3)].nPtr)); 
+																 (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (3)].strVal), variable, (yyvsp[(1) - (3)].conType), true), (yyvsp[(3) - (3)].nPtr)); 
 															}
 														;}
     break;
@@ -1840,7 +1840,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 121 "x.y"
-    { (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (4)].strVal), variable, (yyvsp[(1) - (4)].conType)), (yyvsp[(4) - (4)].nPtr)); ;}
+    { (yyval.nPtr) = opr('=', 2, id((yyvsp[(2) - (4)].strVal), variable, (yyvsp[(1) - (4)].conType), true), (yyvsp[(4) - (4)].nPtr)); ;}
     break;
 
   case 30:
@@ -2499,7 +2499,7 @@ nodeType *con(conTypeEnum type, union Value value) {
     return p; 
 }
 
-nodeType *id(char*  label, Type type, conTypeEnum dataType) {
+nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized) {
     nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
@@ -2590,7 +2590,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n+ - * / error\n");
+			printf("\n+ - * / error");
 			yyerror("wrong");
 		}
 		
@@ -2604,7 +2604,7 @@ void oprSemanticChecks( nodeType* p){
 		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n== != error\n");
+			yyerror("\n== != error");
 		}
 	}
 	// Check for < <= > >=
@@ -2614,7 +2614,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n< > <= >= error\n");
+			yyerror("\n< > <= >= error");
 		}
 	}
 	// Check for & |
@@ -2623,7 +2623,7 @@ void oprSemanticChecks( nodeType* p){
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
 			p->retType = typebool;
 		}else{
-			printf("\n| & error\n");
+			yyerror("\n| & error");
 		}
 	}
 	// CHeck for ~
@@ -2631,7 +2631,7 @@ void oprSemanticChecks( nodeType* p){
 		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n~ error\n");
+			yyerror("\n~ error");
 		}
 	}
 	//Check for = (Assignment)
@@ -2642,7 +2642,7 @@ void oprSemanticChecks( nodeType* p){
 		symbol->type == variable){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nassignment error\n");
+			yyerror("\nassignment error");
 
 		}
 	}
@@ -2652,7 +2652,7 @@ void oprSemanticChecks( nodeType* p){
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nconstant init error\n");
+			yyerror("\nconstant init error");
 
 		}
 	}
@@ -2666,7 +2666,7 @@ void oprSemanticChecks( nodeType* p){
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\ncases types not equal\n");
+			yyerror("\ncases types not equal");
 		}
 	}
 	// Check for SWITCH : expr type is same as inner expressions
@@ -2674,7 +2674,7 @@ void oprSemanticChecks( nodeType* p){
 		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
 			p->retType = typevoid;
 		}else{
-			printf("\nswitch and cases types not equal\n");
+			yyerror("\nswitch and cases types not equal");
 		}
 	}	
 	else{
