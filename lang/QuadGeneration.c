@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "header.h"
-#include "y.tab.h"
+#include "x.tab.h"
 #include "string.h"
 
 #include <stdio.h>

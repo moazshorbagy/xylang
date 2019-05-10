@@ -62,10 +62,11 @@
      FUNCTION = 278,
      MAIN = 279,
      CASE_JOIN = 280,
-     INT = 281,
-     FLOAT = 282,
-     STRING = 283,
-     BOOL = 284
+     DEC = 281,
+     INT = 282,
+     FLOAT = 283,
+     STRING = 284,
+     BOOL = 285
    };
 #endif
 
@@ -76,7 +77,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 29 "x.y"
+#line 32 "x.y"
 
     char* strVal;
     int intVal;
@@ -88,7 +89,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 92 "x.tab.h"
+#line 93 "x.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

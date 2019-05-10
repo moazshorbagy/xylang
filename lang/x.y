@@ -111,7 +111,8 @@ decVar	: type IDENTIFIER withVal						{ if($3==NULL){
 																$$=opr(DEC,1,id($2, variable, $1,false));
 																}
 															else{
-																$$=opr(DEC,2,id($2, variable,$1,false),opr('=', 2, id($2, variable, $1,true), $3));
+																id($2, variable,$1,true);
+																$$=opr(DEC,2,getid($2),opr('=', 2, getid($2), $3));
 
 															}
 														}
@@ -420,7 +421,7 @@ void oprSemanticChecks( nodeType* p){
 		// Check types equal and are numbers or booleans
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint 
 		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
-			p->retType = p->opr.op[0]->retType;
+			p->retType = typebool;
 		}else{
 			yyerror("\n== != error");
 		}
@@ -430,7 +431,7 @@ void oprSemanticChecks( nodeType* p){
 	|| p->opr.oper == COND_LSEQ ){
 		// Check types equal and are numbers
 		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
-			p->retType = p->opr.op[0]->retType;
+			p->retType = typebool;
 		}else{
 			yyerror("\n< > <= >= error");
 		}
