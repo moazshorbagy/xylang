@@ -5,11 +5,13 @@
 #include "structures\SymTable.c"
 #include "structures\SymTree.h"
 #include "structures\SymTree.c"
+#include "QuadGeneration.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
+
 
 int yyerror(char*);
 extern int yylex(); 
@@ -19,6 +21,7 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType);
 nodeType *getid(char* value);
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
+int ex(nodeType *p,int lbl1,int lbl2);
 
 
 struct SymTable* currentSymTable;
@@ -65,7 +68,7 @@ struct Tree* tree;
 %%
 
 program	: functions MAIN openbraces  stmts closebraces	{ printf("valid with functions\n");  }
-		| MAIN openbraces  stmts closebraces 			{ printf("valid\n"); }
+		| MAIN openbraces  stmts closebraces 			{ /*printf("valid\n")*/; ex($3,0,0);}
 		;
 	
 stmts	: stmts stmt	{$$ = opr(';', 2, $1, $2);}	
@@ -104,7 +107,7 @@ decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, c
 			;
 
 decVar	: type IDENTIFIER withVal						{ if($3==NULL){
-																 id($2, variable, $1);
+																$$=id($2, variable, $1);
 																}
 															else{
 																 $$ = opr('=', 2, id($2, variable, $1), $3); 
