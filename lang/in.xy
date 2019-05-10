@@ -2,12 +2,9 @@
 main {
   
   
-  switch(8+2){
-	  case (8):
-      int x=3;
+  float x = 3.3;
+  bool y= true;
+  string z= "hi";
 
-    case(3+2*4):
-      int y=33;
-  }
 
 }	

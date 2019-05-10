@@ -58,8 +58,14 @@ int ex(nodeType *p, int lbl1, int lbl2)
 
         //*********************************************************************************************************
     case typeCon:
-
+        if(p->con.type==typeint)
         printf(" %d", p->con.intVal);
+        else if (p->con.type==typebool)
+        printf(p->con.boolVal? "true":"false");
+        else if(p->con.type==typefloat)
+        printf(" %.4f", p->con.floatVal);
+        else if (p->con.type==typestring)
+        printf(" %s", p->con.strVal);
         break;
 
         //*********************************************************************************************************
