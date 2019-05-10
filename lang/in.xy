@@ -1,10 +1,13 @@
 
 main {
   
-  
-  float x = 3.3;
-  bool y= true;
-  string z= "hi";
+  int y=0;
+  switch(y){
+	  case (7+0):
+      int x=3;
 
+    case(3+2*4):
+      int y=33;
+  }
 
 }	

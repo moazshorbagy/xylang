@@ -30,6 +30,9 @@ int toptempvar = 0;
 int tempval = 0;
 bool tempexist = false;
 int tempexp = 0;
+bool switchexp=false;
+int switchval=0;
+nodeType *newp=NULL;
 
 //*********************************************************************************************************
 //*********************************************************************************************************
@@ -50,7 +53,7 @@ void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper);
 int ex(nodeType *p, int lbl1, int lbl2)
 {
     //printf("/nhi/n");
-    
+
     if (!p)
         return 0;
     switch (p->type)
@@ -58,14 +61,14 @@ int ex(nodeType *p, int lbl1, int lbl2)
 
         //*********************************************************************************************************
     case typeCon:
-        if(p->con.type==typeint)
-        printf(" %d", p->con.intVal);
-        else if (p->con.type==typebool)
-        printf(p->con.boolVal? "true":"false");
-        else if(p->con.type==typefloat)
-        printf(" %.4f", p->con.floatVal);
-        else if (p->con.type==typestring)
-        printf(" %s", p->con.strVal);
+        if (p->con.type == typeint)
+            printf(" %d", p->con.intVal);
+        else if (p->con.type == typebool)
+            printf(p->con.boolVal ? "true" : "false");
+        else if (p->con.type == typefloat)
+            printf(" %.4f", p->con.floatVal);
+        else if (p->con.type == typestring)
+            printf(" %s", p->con.strVal);
         break;
 
         //*********************************************************************************************************
@@ -160,10 +163,19 @@ int ex(nodeType *p, int lbl1, int lbl2)
         case SWITCH:
             lbl2 = lbl++;
             push(lbl2, 0);
+            if(p->opr.op[0]->type==typeOpr)
+            {
             ex(p->opr.op[0], lbl1, lbl2);
             tempexp = pop(2);
+            switchexp=true;
+
+            }
+            else
+                newp=p->opr.op[0];
+            
+            
             ex(p->opr.op[1], lbl1, lbl2);
-            int last= pop(0);
+            int last = pop(0);
             printf("L%03d:\n", last);
 
             break;
@@ -279,31 +291,34 @@ int ex(nodeType *p, int lbl1, int lbl2)
                 break;
 
             //*********************************************************************************************************
-            case CASE:
-                ;
+            case CASE:;
 
-                int first= pop(0);
+                int first = pop(0);
                 printf("L%03d:\n", first);
-                bool exp0=false;
-                if(p->opr.op[0]->type == typeOpr)
+                bool exp0 = false;
+                if (p->opr.op[0]->type == typeOpr)
                 {
                     ex(p->opr.op[0], lbl1, lbl2);
-                    exp0=true;
+                    exp0 = true;
                 }
-                
+
                 int tempexp2;
                 printf("\n");
                 printf("\t%s", "compEQ");
+                if(switchexp)
                 printf(" Temp%d", tempexp);
-                if(exp0)
-                {   
-                    tempexp2= pop(2);
+                else
+                {
+                    ex(newp, lbl1, lbl2);
+                }
+                if (exp0)
+                {
+                    tempexp2 = pop(2);
                     printf(" Temp%d", tempexp2);
                 }
                 else
-                 ex(p->opr.op[0], lbl1, lbl2);
-                
-              
+                    ex(p->opr.op[0], lbl1, lbl2);
+
                 printf(" Temp%d ", tempval);
                 push(tempval, 2);
                 tempval++;
@@ -316,40 +331,6 @@ int ex(nodeType *p, int lbl1, int lbl2)
                 printf(" L%03d\n", lbl2);
                 ex(p->opr.op[1], lbl1, lbl2);
                 break;
-                // lbl1 = lbl++;
-                // push(lbl1, 0);
-                // printf("L%03d:\n", lbl1);
-
-
-                
-            //     int first= pop(0);
-            //     printf("L%03d:\n", first);
-            //
-            // printf("\n");
-            //     int tempexp = pop(2);
-            //     ex(p->opr.op[0], lbl1, lbl2);
-            //     int tempexp2 = pop(2);
-                
-            //     printf("\n");
-            //     printf("\t%s", "compEQ");
-            //     printf(" Temp%d", tempexp);
-            //     printf(" Temp%d", tempexp2);
-            //     printf(" Temp%d ", tempval);
-            //     push(tempval, 2);
-            //     tempval++;
-            //     printf("\n");
-            //     printf("\n\tJNEQ");
-            //     int tempswitch = pop(2);
-            //     printf(" Temp%d", tempswitch);
-            //     lbl2 = lbl++;
-            //     push(lbl2, 1);
-            //     printf(" L%03d\n", lbl2);
-            //     lbl1 = lbl++;
-            //     push(lbl1, 0);
-            //     printf("L%03d:\n", lbl1);
-            //     ex(p->opr.op[1], lbl1, lbl2);
-
-            //     break;
 
             //*********************************************************************************************************
             case CASE_JOIN:
@@ -482,5 +463,4 @@ void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper)
     push(tempval, 2);
     tempval++;
     printf("\n");
-
 }
