@@ -16,6 +16,8 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
 //*********************************************Variables***************************************************
+
+
 static int lbl = 0;
 char arr[10] = "";
 int st[100][10];
@@ -33,6 +35,7 @@ int tempexp = 0;
 bool switchexp=false;
 int switchval=0;
 nodeType *newp=NULL;
+static int rownum=1;
 
 //*********************************************************************************************************
 //*********************************************************************************************************
@@ -43,37 +46,46 @@ void push(int x, int stack);
 
 int pop(int stack);
 
-void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper);
+void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper,FILE *fp);
 
 //*********************************************************************************************************
 //*********************************************************************************************************
 //*********************************************************************************************************
 //*********************************************************************************************************
 
-int ex(nodeType *p, int lbl1, int lbl2)
+int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
 {
-    //printf("/nhi/n");
+    
+ 
+   if(start==0)
+   {
+       fprintf(fp,"%d",rownum);
+        rownum++;
+        start++;
+   }
+  
 
     if (!p)
         return 0;
     switch (p->type)
     {
+        
 
         //*********************************************************************************************************
     case typeCon:
         if (p->con.type == typeint)
-            printf(" %d", p->con.intVal);
+            fprintf (fp," %d", p->con.intVal);
         else if (p->con.type == typebool)
-            printf(p->con.boolVal ? "true" : "false");
+            fprintf (fp,p->con.boolVal ? "true" : "false");
         else if (p->con.type == typefloat)
-            printf(" %.4f", p->con.floatVal);
+            fprintf (fp," %.4f", p->con.floatVal);
         else if (p->con.type == typestring)
-            printf(" %s", p->con.strVal);
+            fprintf (fp," %s", p->con.strVal);
         break;
 
         //*********************************************************************************************************
     case typeId:
-        printf(" %s", (p->id.label));
+        fprintf (fp," %s", (p->id.label));
         break;
         //*********************************************************************************************************
 
@@ -81,81 +93,113 @@ int ex(nodeType *p, int lbl1, int lbl2)
         switch (p->opr.oper)
         {
 
-            //*********************************************************************************************************
+        //*********************************************************************************************************
         case WHILE:
             lbl1 = lbl++;
             push(lbl1, 0);
-            printf("L%03d:\n", lbl1);
-            ex(p->opr.op[0], lbl1, lbl2);
-            printf("\n\tJNEQ");
+            fprintf (fp,"L%03d:\n", lbl1);
+            fprintf(fp,"%d",rownum);
+            rownum++;
+            ex(p->opr.op[0], lbl1, lbl2,fp,1);
+            fprintf (fp,"\n%d\tJNEQ",rownum);
+            rownum++;
             int tempwhile = pop(2);
-            printf(" Temp%d", tempwhile);
+            fprintf (fp," Temp%d", tempwhile);
             lbl2 = lbl++;
             push(lbl2, 1);
-            printf(" L%03d\n", lbl2);
-            ex(p->opr.op[1], lbl1, lbl2);
+            fprintf (fp," L%03d\n", lbl2);
+            fprintf(fp,"%d",rownum);
+            rownum++;
+            ex(p->opr.op[1], lbl1, lbl2,fp,1);
             int popjmp = pop(0);
-            printf("\tjmp\tL%03d\n", popjmp);
+            fprintf (fp,"\tjmp\tL%03d\n", popjmp);
+            fprintf(fp,"%d",rownum);
+            rownum++;
             int popcon = pop(1);
-            printf("L%03d:\n", popcon);
+            fprintf (fp,"L%03d:\n", popcon);
+            fprintf(fp,"%d",rownum);
+            rownum++;
             break;
 
             //*********************************************************************************************************
 
         case FOR:
-            ex(p->opr.op[0], lbl1, lbl2);
+            ex(p->opr.op[0], lbl1, lbl2,fp,1);
             lbl1 = lbl++;
             push(lbl1, 0);
-            printf("L%03d:\n", lbl1);
-            ex(p->opr.op[1], lbl1, lbl2);
-            printf("\n\tJNEQ");
+            fprintf (fp,"L%03d:\n", lbl1);
+            fprintf(fp,"%d",rownum);
+            rownum++;
+            ex(p->opr.op[1], lbl1, lbl2,fp,1);
+            fprintf (fp,"\n%d\tJNEQ",rownum);
+            rownum++;
             int tempfor = pop(2);
-            printf(" Temp%d", tempfor);
+            fprintf (fp," Temp%d", tempfor);
             lbl2 = lbl++;
             push(lbl2, 1);
-            printf(" L%03d\n", lbl2);
-            ex(p->opr.op[2], lbl1, lbl2);
+            fprintf (fp," L%03d\n", lbl2);
+            fprintf(fp,"%d",rownum);
+            rownum++;
+            ex(p->opr.op[2], lbl1, lbl2,fp,1);
             int popjmpfor = pop(0);
-            printf("\tjmp\tL%03d\n", popjmpfor);
+            fprintf (fp,"\tjmp\tL%03d\n", popjmpfor);
+            fprintf(fp,"%d",rownum);
+            rownum++;
             int popconfor = pop(1);
-            printf("L%03d:\n", popconfor);
+            fprintf (fp,"L%03d:\n", popconfor);
+            fprintf(fp,"%d",rownum);
+            rownum++;
             break;
 
             //*********************************************************************************************************
         case DO:
             lbl1 = lbl++;
             push(lbl1, 0);
-            printf("L%03d:\n", lbl1);
-            ex(p->opr.op[0], lbl1, lbl2);
-            ex(p->opr.op[1], lbl1, lbl2);
-            printf("\n\tJNEQ");
+            fprintf (fp,"L%03d:\n", lbl1);
+            fprintf(fp,"%d",rownum);
+            rownum++;
+            ex(p->opr.op[0], lbl1, lbl2,fp,1);
+            ex(p->opr.op[1], lbl1, lbl2,fp,1);
+            fprintf (fp,"\n%d\tJNEQ",rownum);
+            rownum++;
             int tempdo = pop(2);
-            printf(" Temp%d", tempdo);
+            fprintf (fp," Temp%d", tempdo);
             lbl2 = lbl++;
             push(lbl2, 1);
-            printf(" L%03d\n", lbl2);
+            fprintf (fp," L%03d\n", lbl2);
+            fprintf(fp,"%d",rownum);
+            rownum++;
             int popjmpdo = pop(0);
-            printf("\tjmp\tL%03d\n", popjmpdo);
+            fprintf (fp,"\tjmp\tL%03d\n", popjmpdo);
+            fprintf(fp,"%d",rownum);
+            rownum++;
             int popdo = pop(1);
-            printf("L%03d:\n", popdo);
+            fprintf (fp,"L%03d:\n", popdo);
+            fprintf(fp,"%d",rownum);
+            rownum++;
             break;
 
             //*********************************************************************************************************
         case IF:
-            ex(p->opr.op[0], lbl1, lbl2);
+            ex(p->opr.op[0], lbl1, lbl2,fp,1);
             /* if else */
             lbl1 = lbl++;
-            printf("\n\tJNEQ");
+            fprintf (fp,"\n%d\tJNEQ",rownum);
+            rownum++;
             int temp = pop(2);
-            printf(" Temp%d", temp);
+            fprintf (fp," Temp%d", temp);
             push(lbl1, 0);
-            printf("  L%03d\n", lbl1);
+            fprintf (fp,"  L%03d\n", lbl1);
+            fprintf(fp,"%d",rownum);
+            rownum++;
 
-            ex(p->opr.op[1], lbl1, lbl2);
+            ex(p->opr.op[1], lbl1, lbl2,fp,1);
             if (p->opr.op[1]->type != typeOpr || p->opr.op[1]->opr.oper != ELSE)
             {
                 int lbl3 = pop(0);
-                printf("L%03d:\n", lbl3);
+                fprintf (fp,"L%03d:\n", lbl3);
+                fprintf(fp,"%d",rownum);
+                rownum++;
             }
             break;
             //*********************************************************************************************************
@@ -165,7 +209,7 @@ int ex(nodeType *p, int lbl1, int lbl2)
             push(lbl2, 0);
             if(p->opr.op[0]->type==typeOpr)
             {
-            ex(p->opr.op[0], lbl1, lbl2);
+            ex(p->opr.op[0], lbl1, lbl2,fp,1);
             tempexp = pop(2);
             switchexp=true;
 
@@ -174,9 +218,11 @@ int ex(nodeType *p, int lbl1, int lbl2)
                 newp=p->opr.op[0];
             
             
-            ex(p->opr.op[1], lbl1, lbl2);
+            ex(p->opr.op[1], lbl1, lbl2,fp,1);
             int last = pop(0);
-            printf("L%03d:\n", last);
+            fprintf (fp,"L%03d:\n", last);
+            fprintf(fp,"%d",rownum);
+            rownum++;
 
             break;
 
@@ -185,19 +231,23 @@ int ex(nodeType *p, int lbl1, int lbl2)
 
             if (p->opr.op[1]->type == typeOpr)
             {
-                ex(p->opr.op[1], lbl1, lbl2);
-                printf("\n");
-                printf("\tASSIGN %c ", p->opr.op[0]->id.label);
+                ex(p->opr.op[1], lbl1, lbl2,fp,1);
+                fprintf (fp,"\n");
+                fprintf(fp,"%d",rownum);
+                rownum++;
+                fprintf (fp,"\tASSIGN\t %c ", p->opr.op[0]->id.label);
                 int temp = pop(2);
-                printf(" Temp%d", temp);
+                fprintf (fp," Temp%d", temp);
                 tempexist = false;
             }
             else
             {
-                printf("\tASSIGN %s ", p->opr.op[0]->id.label);
-                ex(p->opr.op[1], lbl1, lbl2);
+                fprintf (fp,"\tASSIGN\t %s ", p->opr.op[0]->id.label);
+                ex(p->opr.op[1], lbl1, lbl2,fp,1);
             }
-            printf("\n");
+            fprintf (fp,"\n");
+            fprintf(fp,"%d",rownum);
+            rownum++;
             break;
 
             //*********************************************************************************************************
@@ -205,145 +255,161 @@ int ex(nodeType *p, int lbl1, int lbl2)
         default:
             if (p->opr.oper == ELSE)
             {
-                ex(p->opr.op[0], lbl1, lbl2);
+                ex(p->opr.op[0], lbl1, lbl2,fp,1);
                 lbl2 = lbl++;
                 push(lbl2, 1);
-                printf("\tjmp\tL%03d\n", lbl2);
+                fprintf (fp,"\tjmp\tL%03d\n", lbl2);
+                fprintf(fp,"%d",rownum);
+                rownum++;
                 int lbl3 = pop(0);
-                printf("L%03d:\n", lbl3);
-                ex(p->opr.op[1], lbl1, lbl2);
+                fprintf (fp,"L%03d:\n", lbl3);
+                fprintf(fp,"%d",rownum);
+                rownum++;
+                ex(p->opr.op[1], lbl1, lbl2,fp,1);
                 int lbl4 = pop(1);
-                printf("L%03d:\n", lbl4);
+                fprintf (fp,"L%03d:\n", lbl4);
+                fprintf(fp,"%d",rownum);
+                rownum++;
                 break;
             }
             switch (p->opr.oper)
             {
                 //*********************************************************************************************************
             case '+':
-                expresion(p, "add", lbl1, lbl2, 2);
+                expresion(p, "add", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
             case '-':
-                expresion(p, "sub", lbl1, lbl2, 2);
+                expresion(p, "sub", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
             case '*':
-                expresion(p, "mult", lbl1, lbl2, 2);
+                expresion(p, "mult", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
             case '/':
-                expresion(p, "div", lbl1, lbl2, 2);
+                expresion(p, "div", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
             case '~':
-                expresion(p, "NEG", lbl1, lbl2, 1);
+                expresion(p, "NEG", lbl1, lbl2, 1,fp);
                 break;
 
                 //*********************************************************************************************************
                 //AND w OR fehom moshkela
             case '&':
-                expresion(p, "And", lbl1, lbl2, 2);
+                expresion(p, "And", lbl1, lbl2, 2,fp);
                 break;
                 //*********************************************************************************************************
             case '|':
-                expresion(p, "OR", lbl1, lbl2, 2);
+                expresion(p, "OR", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
             case '<':
-                expresion(p, "CompLT", lbl1, lbl2, 2);
+                expresion(p, "CompLT", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
             case '>':
-                expresion(p, "compGT", lbl1, lbl2, 2);
+                expresion(p, "compGT", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
             case COND_GREQ:
-                expresion(p, "compGTEQ", lbl1, lbl2, 2);
+                expresion(p, "compGTEQ", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
             case COND_LSEQ:
-                expresion(p, "compLTEQ", lbl1, lbl2, 2);
+                expresion(p, "compLTEQ", lbl1, lbl2, 2,fp);
                 break;
                 //*********************************************************************************************************
 
             case COND_NEQ:
-                expresion(p, "compNEQ", lbl1, lbl2, 2);
+                expresion(p, "compNEQ", lbl1, lbl2, 2,fp);
                 break;
                 //*********************************************************************************************************
 
             case COND_EQ:
-                expresion(p, "compEQ", lbl1, lbl2, 2);
+                expresion(p, "compEQ", lbl1, lbl2, 2,fp);
                 break;
 
                 //*********************************************************************************************************
 
             case ';':
-                ex(p->opr.op[0], lbl1, lbl2);
-                ex(p->opr.op[1], lbl1, lbl2);
+                ex(p->opr.op[0], lbl1, lbl2,fp,1);
+                ex(p->opr.op[1], lbl1, lbl2,fp,1);
                 break;
 
             //*********************************************************************************************************
             case CASE:;
 
                 int first = pop(0);
-                printf("L%03d:\n", first);
+                fprintf (fp,"L%03d:\n", first);
+                fprintf(fp,"%d",rownum);
+            rownum++;
                 bool exp0 = false;
                 if (p->opr.op[0]->type == typeOpr)
                 {
-                    ex(p->opr.op[0], lbl1, lbl2);
+                    ex(p->opr.op[0], lbl1, lbl2,fp,1);
                     exp0 = true;
                 }
 
                 int tempexp2;
-                printf("\n");
-                printf("\t%s", "compEQ");
+                fprintf (fp,"\n");
+                fprintf(fp,"%d",rownum);
+            rownum++;
+                fprintf (fp,"\t%s", "compEQ");
                 if(switchexp)
-                printf(" Temp%d", tempexp);
+                fprintf (fp," Temp%d", tempexp);
                 else
                 {
-                    ex(newp, lbl1, lbl2);
+                    ex(newp, lbl1, lbl2,fp,1);
                 }
                 if (exp0)
                 {
                     tempexp2 = pop(2);
-                    printf(" Temp%d", tempexp2);
+                    fprintf (fp," Temp%d", tempexp2);
                 }
                 else
-                    ex(p->opr.op[0], lbl1, lbl2);
+                    ex(p->opr.op[0], lbl1, lbl2,fp,1);
 
-                printf(" Temp%d ", tempval);
+                fprintf (fp," Temp%d ", tempval);
                 push(tempval, 2);
                 tempval++;
-                printf("\n");
-                printf("\n\tJNEQ");
+                fprintf (fp,"\n");
+                fprintf(fp,"%d",rownum);
+                rownum++;
+                fprintf (fp,"\tJNEQ");
                 int tempswitch = pop(2);
-                printf(" Temp%d", tempswitch);
+                fprintf (fp," Temp%d", tempswitch);
                 lbl2 = lbl++;
                 push(lbl2, 0);
-                printf(" L%03d\n", lbl2);
-                ex(p->opr.op[1], lbl1, lbl2);
+                fprintf (fp," L%03d\n", lbl2);
+                fprintf(fp,"%d",rownum);
+                rownum++;
+                ex(p->opr.op[1], lbl1, lbl2,fp,1);
                 break;
 
             //*********************************************************************************************************
             case CASE_JOIN:
-                ex(p->opr.op[0], lbl1, lbl2);
-                ex(p->opr.op[1], lbl1, lbl2);
+                ex(p->opr.op[0], lbl1, lbl2,fp,1);
+                ex(p->opr.op[1], lbl1, lbl2,fp,1);
                 break;
 
             //*********************************************************************************************************
             case CONST:
-                printf("\tDECCONST  ");
-                ex(p->opr.op[0], lbl1, lbl2);
-                ex(p->opr.op[1], lbl1, lbl2);
-                printf("\n");
+                fprintf (fp,"\tDECCONST  ");
+                ex(p->opr.op[0], lbl1, lbl2,fp,1);
+                ex(p->opr.op[1], lbl1, lbl2,fp,1);
+                fprintf (fp,"\n");
+                fprintf(fp,"%d",rownum);
+                rownum++;
                 break;
 
             //*********************************************************************************************************
@@ -352,16 +418,20 @@ int ex(nodeType *p, int lbl1, int lbl2)
                 if (p->opr.nops == 1)
                 {
                     
-                    ex(p->opr.op[0], lbl1, lbl2);
+                    ex(p->opr.op[0], lbl1, lbl2,fp,1);
                 }
                 else
-                {   printf("\tDECVAR  ");
-                    ex(p->opr.op[0], lbl1, lbl2);
-                    printf("\n");
-                    ex(p->opr.op[1], lbl1, lbl2);
+                {   fprintf (fp,"\tDECVAR  ");
+                    ex(p->opr.op[0], lbl1, lbl2,fp,1);
+                    fprintf (fp,"\n");
+                    fprintf(fp,"%d",rownum);
+                    rownum++;
+                    ex(p->opr.op[1], lbl1, lbl2,fp,1);
                 }
 
-                printf("\n");
+                fprintf (fp,"\n");
+                fprintf(fp,"%d",rownum);
+                rownum++;
                 break;
 
             default:
@@ -370,6 +440,8 @@ int ex(nodeType *p, int lbl1, int lbl2)
         }
     }
     return 0;
+     /* close the file*/  
+   //
 }
 
 //*********************************************************************************************************
@@ -382,11 +454,11 @@ void push(int x, int stack)
 {
     if (topif1 >= 99 || topif2 >= 99)
     {
-        printf("\n\tSTACK is over flow");
+        printf ("\n\tSTACK is over flow");
     }
     else
     {
-        // printf("\n /n %d /n \n",x);
+        // fprintf (fp,"\n /n %d /n \n",x);
         if (stack == 0)
         {
             stackif1[topif1] = x;
@@ -415,7 +487,7 @@ int pop(int stack)
 {
     if (topif1 <= -1 || topif2 <= -1)
     {
-        printf("\n\t Stack is under flow\n");
+        printf ("\n\t Stack is under flow\n");
         return 0;
     }
     else
@@ -447,7 +519,7 @@ int pop(int stack)
 //*********************************************************************************************************
 //*********************************************************************************************************
 //*********************************************************************************************************
-void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper)
+void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper,FILE *fp)
 {
     bool doneop0 = false;
     bool doneop1 = false;
@@ -457,36 +529,40 @@ void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper)
     if (p->opr.op[0]->type == typeOpr)
     {
 
-        ex(p->opr.op[0], lbl1, lbl2);
+        ex(p->opr.op[0], lbl1, lbl2,fp,1);
         valuepop0 = pop(2);
         doneop0 = true;
     }
     if (p->opr.op[1]->type == typeOpr)
     {
-        ex(p->opr.op[1], lbl1, lbl2);
+        ex(p->opr.op[1], lbl1, lbl2,fp,1);
         valuepop1 = pop(2);
         doneop1 = true;
     }
-    printf("\n");
-    printf("\t%s", string);
+    fprintf (fp,"\n");
+    fprintf(fp,"%d",rownum);
+    rownum++;
+    fprintf (fp,"\t%s", string);
     if (!doneop0)
     {
-        ex(p->opr.op[0], lbl1, lbl2);
+        ex(p->opr.op[0], lbl1, lbl2,fp,1);
     }
     else
     {
-        printf(" Temp%d", valuepop0);
+        fprintf (fp," Temp%d", valuepop0);
     }
     if (oper == 2 && !doneop1)
-        ex(p->opr.op[1], lbl1, lbl2);
+        ex(p->opr.op[1], lbl1, lbl2,fp,1);
     else
     {
-        printf(" Temp%d", valuepop1);
+        fprintf (fp," Temp%d", valuepop1);
     }
 
-    printf(" Temp%d ", tempval);
+    fprintf (fp," Temp%d ", tempval);
     tempexist = true;
     push(tempval, 2);
     tempval++;
-    printf("\n");
+    fprintf (fp,"\n");
+    fprintf(fp,"%d",rownum);
+    rownum++;
 }

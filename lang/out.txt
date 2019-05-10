@@ -1,0 +1,4 @@
+1	DECVAR   x
+2	ASSIGN	 x  5
+3
+4
