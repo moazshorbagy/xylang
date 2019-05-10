@@ -1,17 +1,10 @@
 
 main {
+  const bool y=true;
   
-  int x =5;
-  int y;
-  while(5<0){
-    int z;
-  }
-  while (x<0){
-    x = x +1;
-  }
-  for(x=0; x<5;x=x+1){
-    int z;
-    int m;
-  }
+   bool z = true;
+  z =   y;
+
+  
   
 }	

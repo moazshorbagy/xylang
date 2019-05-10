@@ -60,8 +60,8 @@ int yylineno ;
     /* Language characters */
     
 [-=+*/;&|<>(){}:,\[\]~]	{ return *yytext; }
-"<="				{ return COND_GREQ; }
-">="				{ return COND_LSEQ; }
+">="				{ return COND_GREQ; }
+"<="				{ return COND_LSEQ; }
 "=="				{ return COND_EQ; }
 "!="				{ return COND_NEQ; }
 

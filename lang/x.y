@@ -103,7 +103,8 @@ multipleExpr	: expr
 				| multipleExpr ',' expr
 				;
 
-decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, constVariable, $2, true), $5); }
+decConstant :  CONST type IDENTIFIER '=' expr ';'		{ 	id($3, constVariable, $2, true);
+															$$ = opr(CONST, 2, getid($3, true, false), $5); }
 			;
 
 decVar	: type IDENTIFIER withVal						{ if($3==NULL)
@@ -282,9 +283,9 @@ return	: RETURN expr ';'
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 
-openbraces : '{'					  { printf("openbraces\n"); currentSymTable = startScope(tree);} 
+openbraces : '{'					  { currentSymTable = startScope(tree);} 
 	;
-closebraces : '}'					  { printf("closebraces\n"); symTablePrint(currentSymTable); currentSymTable = endScope(tree);}
+closebraces : '}'					  { currentSymTable = endScope(tree);}
 	; 
 
 %%
@@ -328,9 +329,9 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized)
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
 	}
-	 printf("hiii2");
+	 
 	int flag = symInsert(currentSymTable, label, type, dataType);
-	printf("hiii2");
+	
 	if(flag == -1){
 		yyerror("\nRedeclaration\n");
 	}
@@ -351,9 +352,8 @@ nodeType *getid(char* value, bool setInitilized, bool setUsed) {
          yyerror("out of memory");
 
 	// Update the variable with initializtaion/usage info
-	printf("hiii");
 	symUpdate(currentSymTable, value, setInitilized, setUsed, NULL);
-	printf("hiii");
+	
 	// look up the symbol table to get values
 	struct Symbol* sym= symLookup(currentSymTable, value);
 
@@ -390,23 +390,6 @@ nodeType *opr(int oper, int nops, ...) {
         p->opr.op[i] = va_arg(ap, nodeType*);
     va_end(ap);
 	
-	// if(oper==WHILE){
-	// 	//printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
-	// }
-	// if(oper==DO){
-	// 	printf("\nDOOOOOO\n %d \n %d\n",  p->opr.op[0]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal, p->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
-	// }
-
-	// /*if(oper==FOR){
-	// 	printf("\nfor\n %c \n\n", p->opr.op[2]->opr.op[1]->opr.op[1]->opr.oper ); 
-	// }*/
-
-	// if(oper==IF){
-	// 	printf("\nIFFFFFFFFF\n %d\n\n" , p->opr.op[1]->opr.op[0]->opr.op[1]->con.intVal );
-	// }
-	
-	
-	//TODO: Semantic checks
 	oprSemanticChecks(p);
 
     return p;
@@ -432,10 +415,23 @@ void oprSemanticChecks( nodeType* p){
 
 	// Arithmetic check : types are same and are numbers //
 	if(p->opr.oper == '+' || p->opr.oper == '-' || p->opr.oper == '*' || p->opr.oper == '/' ){
-		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
-			p->retType = p->opr.op[0]->retType;
+		
+		// Check types are same
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType) {
+			
+			// Check type is integer or float
+			if((p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
+				p->retType = p->opr.op[0]->retType;
+			}else{
+				char message [50];
+				sprintf	(message, "(%c) usage error :  unallowed types", p->opr.oper );
+				yyerror(message);
+			}
 		}else{
-			yyerror("\n+ - * / error");
+			
+			char message [50];
+			sprintf	(message, "(%c) usage error :  type mismatch", p->opr.oper );
+			yyerror(message);
 			
 		}
 		
@@ -444,60 +440,106 @@ void oprSemanticChecks( nodeType* p){
 	// Logical expressions //
 	// Check for == or != 
 	else if( p->opr.oper == COND_EQ || p->opr.oper == COND_NEQ){
-		// Check types equal and are numbers or booleans
-		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint 
-		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
-			p->retType = typebool;
-		}else{
-			yyerror("\n== != error");
+		
+		// Check type mismatch
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+			
+			// Check types are bool, int or float
+			if(p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool){
+				p->retType = typebool;
+			}else{
+				char message [50];
+				sprintf	(message, "(%s) usage error :  unallowed types", p->opr.oper == COND_EQ ? "==" : "!=" );
+				yyerror(message);
+			}
+		} 	
+		else{
+
+			char message [50];
+			sprintf	(message, "(%s) usage error : type mismatch", p->opr.oper == COND_EQ ? "==" : "!=" );
+			yyerror(message);
 		}
 	}
+
 	// Check for < <= > >=
 	else if( p->opr.oper == '<' || p->opr.oper == '>' || p->opr.oper == COND_GREQ 
 	|| p->opr.oper == COND_LSEQ ){
-		// Check types equal and are numbers
-		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
-			p->retType = typebool;
+		// Check types equal
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+
+			// Check types are integer or float
+			if(p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat){
+				p->retType = typebool;
+			}else{
+				char message [50];
+				sprintf	(message, "(%s) usage error :  unallowed types", p->opr.oper == '<' ? "<" : (p->opr.oper=='>' ? ">" : (p->opr.oper == COND_GREQ ? ">=" : "<=" )));
+				yyerror(message);
+			}
+
 		}else{
-			yyerror("\n< > <= >= incompatible types error");
+			char message [50];
+			sprintf	(message, "(%s) usage error : type mismatch",  p->opr.oper == '<' ? "<" : (p->opr.oper=='>' ? ">" : (p->opr.oper == COND_GREQ ? ">=" : "<=" )));
+			yyerror(message);
 		}
 	}
+
 	// Check for & |
 	else if( p->opr.oper == '|' || p->opr.oper == '&'){
-		// Check types are equal and booleans
-		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
-			p->retType = typebool;
+		// Check types are equal
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+			// Check type is boolean
+			if(p->opr.op[1]->retType == typebool){
+				p->retType = typebool;
+			}else{
+				char message [50];
+				sprintf	(message, "(%c) usage error :  unallowed types", p->opr.oper);
+				yyerror(message);
+			}
 		}else{
-			yyerror("\n| & incompatible types error");
+			char message [50];
+			sprintf	(message, "(%c) usage error : type mismatch", p->opr.oper);
+			yyerror(message);
 		}
 	}
+
 	// CHeck for ~
 	else if (p->opr.oper == '~'){
+		// Check type is integer or float
 		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			yyerror("\n~ unallowed types error");
+			char message [50];
+			sprintf	(message, "(%c) usage error : unallowed type", p->opr.oper);
+			yyerror(message);
 		}
 	}
-	//Check for = (Assignment)
+
+	// Check for = (Assignment)
 	else if (p->opr.oper == '='){	
 		struct Symbol* symbol = symLookup(p->opr.op[0]->id.symTablePtr, p->opr.op[0]->id.label );
 		// Check types are equal and LHS is variable
-		if( (p->opr.op[0]->retType == p->opr.op[1]->retType) &&
-		symbol->type == variable){
-			p->retType = p->opr.op[0]->retType;
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+			if(symbol->type == variable){
+				p->retType = p->opr.op[0]->retType;
+			}else{
+				char message [50];
+				sprintf	(message, "(=) usage error : attempt to change constant \"%s\"", p->opr.op[0]->id.label);
+				yyerror(message);
+			}
 		}else{
-			yyerror("\nassignment error");
-
+			yyerror("(=) usage error : type mismatch");
 		}
 	}
+
 	// Check for constnt initialization
 	else if( p->opr.oper == CONST){
 		// Check types are equal
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			yyerror("\nconstant init error");
+			char message [50];
+			sprintf	(message, "(=) usage error : type mismatch");
+			yyerror(message);
 
 		}
 	}
