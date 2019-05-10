@@ -355,8 +355,9 @@ int ex(nodeType *p, int lbl1, int lbl2)
                     ex(p->opr.op[0], lbl1, lbl2);
                 }
                 else
-                {
+                {   printf("\tDECVAR");
                     ex(p->opr.op[0], lbl1, lbl2);
+                    printf("\n");
                     ex(p->opr.op[1], lbl1, lbl2);
                 }
 
