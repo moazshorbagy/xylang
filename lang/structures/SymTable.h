@@ -16,4 +16,7 @@ int symUpdate(struct SymTable *, char *label, bool isInitialized, bool isUsed, u
 
 void symTablePrint(struct SymTable *);
 
+// searches for the label sent in the specified SymTable
+struct Symbol *symLookupCurrent(struct SymTable *, char *label);
+
 #endif

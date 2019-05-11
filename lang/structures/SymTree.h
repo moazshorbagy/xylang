@@ -9,4 +9,8 @@ struct SymTable *startScope(struct Tree *);
 
 struct SymTable *endScope(struct Tree *);
 
+void printTree(struct Tree *);
+
+int hitCount(struct Tree *T, char *label);
+
 #endif

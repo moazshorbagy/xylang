@@ -1,6 +1,8 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "SymTree.h"
 #include "SymTable.h"
+#include "Queue.h"
 
 struct Tree *allocateSymTree()
 {
@@ -34,4 +36,62 @@ struct SymTable *endScope(struct Tree *T)
     if (T->currSymTable->parent)
         T->currSymTable = T->currSymTable->parent;
     return T->currSymTable;
+}
+
+void printTree(struct Tree *T)
+{
+    if (T->root->symTable == NULL)
+        return;
+
+    printf("{ \"tree\": [\n");
+
+    struct Queue *q = createQueue();
+    enqueue(q, T->root);
+
+    struct SymTable *tempSymTable;
+
+    while (!queueIsEmpty(q))
+    {
+        tempSymTable = dequeue(q);
+
+        if (tempSymTable->symbolsCount)
+        {
+            if (tempSymTable != T->root)
+                printf(",");
+            symTablePrint(tempSymTable);
+        }
+
+        for (int i = 0; i < tempSymTable->addChildIndex; i++)
+        {
+            enqueue(q, tempSymTable->children[i]);
+        }
+    }
+    printf("]}\n");
+}
+
+int hitCount(struct Tree *T, char *label)
+{
+    if (T->root->symTable == NULL)
+        return 0;
+
+    struct Queue *q = createQueue();
+    enqueue(q, T->root);
+
+    int hitCount = 0;
+
+    struct SymTable *tempSymTable;
+
+    while (!queueIsEmpty(q))
+    {
+        tempSymTable = dequeue(q);
+
+        if (symLookupCurrent(tempSymTable, label))
+            hitCount++;
+
+        for (int i = 0; i < tempSymTable->addChildIndex; i++)
+        {
+            enqueue(q, tempSymTable->children[i]);
+        }
+    }
+    return hitCount;
 }

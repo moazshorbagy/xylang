@@ -94,6 +94,7 @@ int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum dataty
 
     // adding the new symbol to the specified symTable
     table->symTable[hashIndex] = symbol;
+    table->symbolsCount++;
 
     return 1;
 }
@@ -118,36 +119,59 @@ int symUpdate(struct SymTable *table, char *label, bool isInitialized, bool isUs
 
 void symTablePrint(struct SymTable *table)
 {
-    printf("printing table: %p\n", table);
+    bool j = false; // required to not print the first comma
+    printf("{ \"table\": \"%p\",\n \"parent\": \"%p\",\n \"symbols\": [", table, table->parent);
     for (int i = 0; i < TABLE_SIZE; i++)
     {
         if (table->symTable[i] != NULL)
         {
-            printf("label: %s index: %d", table->symTable[i]->label, i);
+            if (j)
+                printf(",\n");
+            else
+                j = true;
+
+            printf("{ \"label\": \"%s\", \"index\": \"%d\"", table->symTable[i]->label, i);
             if (table->symTable[i]->isInitialized)
                 switch (table->symTable[i]->datatype)
                 {
                 case typeint:
-                    printf(" value: %d", table->symTable[i]->symValue->intVal);
+                    printf(", \"value\": \"%d\"", table->symTable[i]->symValue->intVal);
                     break;
 
                 case typefloat:
-                    printf(" value: %f", table->symTable[i]->symValue->floatVal);
+                    printf(", \"value\": \"%f\"", table->symTable[i]->symValue->floatVal);
                     break;
 
                 case typestring:
-                    printf(" value: %s", table->symTable[i]->symValue->strVal);
+                    printf(", \"value\": \"%s\"", table->symTable[i]->symValue->strVal);
                     break;
 
                 case typebool:
-                    printf(" value: %s", table->symTable[i]->symValue->boolVal ? "true" : "false");
+                    printf(", \"value\": \"%s\"", table->symTable[i]->symValue->boolVal ? "true" : "false");
                     break;
 
                 default:
                     break;
                 }
-            printf("\n");
+            printf("}");
         }
     }
-    printf("\n");
+    printf("\n]}\n");
+}
+
+struct Symbol *symLookupCurrent(struct SymTable *table, char *label)
+{
+    int hashIndex = _hash(label);
+
+    // linear probing
+    while (table->symTable[hashIndex] != NULL && strcmp(table->symTable[hashIndex]->label, label) != 0)
+    {
+        if (hashIndex == TABLE_SIZE - 1)
+        {
+            hashIndex = -1;
+        }
+        hashIndex++;
+    }
+
+    return table->symTable[hashIndex];
 }
