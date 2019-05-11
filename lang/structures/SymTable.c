@@ -176,3 +176,16 @@ struct Symbol *symLookupCurrent(struct SymTable *table, char *label)
 
     return table->symTable[hashIndex];
 }
+
+
+void genUnusedWarnings(struct SymTable *table){
+     for (int i = 0; i < TABLE_SIZE; i++)
+    {
+        if (table->symTable[i] != NULL)
+        {
+            if (table->symTable[i]->isUsed == false){
+                printf("\nWarning: Unused variable \"%s\"",table->symTable[i]->label);
+            }
+        }
+    }
+}

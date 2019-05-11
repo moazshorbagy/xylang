@@ -13,4 +13,6 @@ void printTree(struct Tree *);
 
 int hitCount(struct Tree *T, char *label);
 
+void checkUnusedVars(struct Tree *T);
+
 #endif

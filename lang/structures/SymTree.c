@@ -96,3 +96,29 @@ int hitCount(struct Tree *T, char *label)
     }
     return hitCount;
 }
+
+
+void checkUnusedVars(struct Tree *T){
+    if (T->root->symTable == NULL)
+        return;
+
+    struct Queue *q = createQueue();
+    enqueue(q, T->root);
+
+    struct SymTable *tempSymTable;
+
+    while (!queueIsEmpty(q))
+    {
+        tempSymTable = dequeue(q);
+
+        if (tempSymTable->symbolsCount)
+        {
+            genUnusedWarnings(tempSymTable);
+        }
+
+        for (int i = 0; i < tempSymTable->addChildIndex; i++)
+        {
+            enqueue(q, tempSymTable->children[i]);
+        }
+    }
+}

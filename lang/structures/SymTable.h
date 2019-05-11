@@ -19,4 +19,6 @@ void symTablePrint(struct SymTable *);
 // searches for the label sent in the specified SymTable
 struct Symbol *symLookupCurrent(struct SymTable *, char *label);
 
+void genUnusedWarnings(struct SymTable *table);
+
 #endif
