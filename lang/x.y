@@ -146,7 +146,7 @@ assign	: IDENTIFIER '=' expr					{ $$ = opr('=',2,getid($1, true, false),$3);}
 matched	: IF '(' cond ')' ifcont				{ $$ = opr(IF, 2,  $3, $5);}
 		;
 		
-ifcont	: openbraces  stmtornull 									{ $$ = $2;}
+ifcont	: openbraces  stmtornull 									{ $$ = $2; }
 		| openbraces  stmtornull  ELSE openbraces stmtornull		{ $$ = opr(ELSE, 2, $2, $5);}
 		;
 		
@@ -408,12 +408,12 @@ void oprSemanticChecks( nodeType* p){
 	}
 	
 	
-	if(p->opr.nops > 1 && p->opr.op[1]->type == typeId && symLookup(currentSymTable, p->opr.op[1]->id.label)->isInitialized == false ){
+	if(p->opr.nops > 1 && p->opr.op[1] != NULL && p->opr.op[1]->type == typeId && symLookup(currentSymTable, p->opr.op[1]->id.label)->isInitialized == false ){
 		char message [20];
 		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
 		yyerror(message);
 	}
-
+	if(p->opr.oper == IF) printf("hiiii if");
 	// Arithmetic check : types are same and are numbers //
 	if(p->opr.oper == '+' || p->opr.oper == '-' || p->opr.oper == '*' || p->opr.oper == '/' ){
 		
@@ -568,7 +568,7 @@ void oprSemanticChecks( nodeType* p){
 	else{
 		p->retType = typevoid;
 	}
-
+	if(p->opr.oper == IF) printf("hiiii if");
 }
 
 
