@@ -7,7 +7,7 @@
 *.hex
 
 # Auto-generated files
-lex.yy.c
+*.yy.c
 *.tab.c
 *.tab.h
 
