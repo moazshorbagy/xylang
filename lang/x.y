@@ -143,7 +143,7 @@ assign	: IDENTIFIER '=' expr					{ $$ = opr('=',2,getid($1, true, false),$3);}
 
 	/* Conditional if-else */
 
-matched	: IF '(' cond ')' ifcont				{ $$ = opr(IF, 2,  $3, $5);}
+matched	: IF '(' expr ')' ifcont				{ $$ = opr(IF, 2,  $3, $5);}
 		;
 		
 ifcont	: openbraces  stmtornull 									{ $$ = $2; }
@@ -153,7 +153,7 @@ ifcont	: openbraces  stmtornull 									{ $$ = $2; }
 		
 	/* Loops */
 
-whilestmt	: WHILE '(' cond ')' openbraces stmtornull 				{ $$ = opr(WHILE, 2, $3, $6);}
+whilestmt	: WHILE '(' expr ')' openbraces stmtornull 				{ $$ = opr(WHILE, 2, $3, $6);}
 			;
 
 dowhilestmt	: DO openbraces  stmtornull WHILE '(' cond ')' ';'		{ $$ = opr(DO, 2, $3, $6);}
@@ -413,7 +413,7 @@ void oprSemanticChecks( nodeType* p){
 		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
 		yyerror(message);
 	}
-	if(p->opr.oper == IF) printf("hiiii if");
+	
 	// Arithmetic check : types are same and are numbers //
 	if(p->opr.oper == '+' || p->opr.oper == '-' || p->opr.oper == '*' || p->opr.oper == '/' ){
 		
@@ -565,10 +565,20 @@ void oprSemanticChecks( nodeType* p){
 			yyerror("\nswitch and cases types not equal");
 		}
 	}	
+
+	// Check for FOR: condition return type is boolean
+	else if(p->opr.oper == IF || p->opr.oper == WHILE){
+		if(p->opr.op[0]->retType == typebool ){
+			p->retType = typevoid;
+		}else{
+			yyerror("(if) usage error : inner expression is not boolean");
+		}
+	}
+
 	else{
 		p->retType = typevoid;
 	}
-	if(p->opr.oper == IF) printf("hiiii if");
+	
 }
 
 
