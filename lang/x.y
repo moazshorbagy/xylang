@@ -159,7 +159,7 @@ whilestmt	: WHILE '(' expr ')' openbraces stmtornull 				{ $$ = opr(WHILE, 2, $3
 dowhilestmt	: DO openbraces  stmtornull WHILE '(' expr ')' ';'		{ $$ = opr(DO, 2, $3, $6);}
 			;
 
-forloopstmt	: FOR '(' assigndec ';' cond ';' forloopcont			{ $$ = opr(FOR, 3, $3, $5, $7);}
+forloopstmt	: FOR '(' assigndec ';' expr ';' forloopcont			{ $$ = opr(FOR, 3, $3, $5, $7);}
 			;
 
 forloopcont	: assign ')' openbraces  stmtornull						{ $$ = opr(';', 2, $4, $1);}
@@ -578,12 +578,12 @@ void oprSemanticChecks( nodeType* p){
 	}
 
 	// Check for doWhile: condition return type is boolean
-	else if(p->opr.oper ==DO){
+	else if(p->opr.oper ==DO || p->opr.oper ==FOR){
 		if(p->opr.op[1]->retType == typebool ){
 			p->retType = typevoid;
 		}else{
 			char message [50];
-			sprintf	(message, "(do while) usage error : inner expression doesn't return boolean");
+			sprintf	(message, "(%s) usage error : inner expression doesn't return boolean", p->opr.oper==DO ? "do while" : "for");
 			yyerror(message);
 		}
 	}
