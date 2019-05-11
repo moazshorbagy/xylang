@@ -61,7 +61,7 @@ struct Symbol *symLookup(struct SymTable *table, char *label)
     return tempTable->symTable[tempHashIndex];
 }
 
-int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum datatype, struct Tree * tree)
+int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum datatype, struct Tree *tree)
 {
     if (table->symbolsCount == TABLE_SIZE - 1)
         return -1;
@@ -132,7 +132,7 @@ void symTablePrint(struct SymTable *table)
                 j = true;
 
             printf("{ \"label\": \"%s\", \"index\": \"%d\"", table->symTable[i]->label, i);
-            if (table->symTable[i]->isInitialized)
+            if (table->symTable[i]->isInitialized && table->symTable[i]->symValue)
                 switch (table->symTable[i]->datatype)
                 {
                 case typeint:
@@ -177,14 +177,15 @@ struct Symbol *symLookupCurrent(struct SymTable *table, char *label)
     return table->symTable[hashIndex];
 }
 
-
-void genUnusedWarnings(struct SymTable *table){
-     for (int i = 0; i < TABLE_SIZE; i++)
+void genUnusedWarnings(struct SymTable *table)
+{
+    for (int i = 0; i < TABLE_SIZE; i++)
     {
         if (table->symTable[i] != NULL)
         {
-            if (table->symTable[i]->isUsed == false){
-                printf("\nWarning: Unused variable \"%s\"",table->symTable[i]->label);
+            if (table->symTable[i]->isUsed == false)
+            {
+                printf("Warning: Unused variable \"%s\"\n$\n", table->symTable[i]->label);
             }
         }
     }

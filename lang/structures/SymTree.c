@@ -50,6 +50,7 @@ void printTree(struct Tree *T)
     enqueue(q, T->root);
 
     struct SymTable *tempSymTable;
+    bool j = false; // required to not print the first comma
 
     while (!queueIsEmpty(q))
     {
@@ -57,8 +58,10 @@ void printTree(struct Tree *T)
 
         if (tempSymTable->symbolsCount)
         {
-            if (tempSymTable != T->root)
-                printf(",");
+            if (j)
+                printf(",\n");
+            else
+                j = true;
             symTablePrint(tempSymTable);
         }
 
@@ -97,8 +100,8 @@ int hitCount(struct Tree *T, char *label)
     return hitCount;
 }
 
-
-void checkUnusedVars(struct Tree *T){
+void checkUnusedVars(struct Tree *T)
+{
     if (T->root->symTable == NULL)
         return;
 

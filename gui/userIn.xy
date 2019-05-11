@@ -1,0 +1,17 @@
+main 
+{
+int x = 3;
+bool y=true;
+if(y)
+{
+
+}
+else
+{
+
+
+}
+
+
+
+}

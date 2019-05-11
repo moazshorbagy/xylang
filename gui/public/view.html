@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Compiler</title>
+    <link href="styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+
+</head>
+
+<body onload="defaultRadio()" class="center">
+
+    <header>
+        <h1>XY Compiler</h1>
+    </header>
+    <div class="center" style="max-width:400px">
+        <hr>
+    </div>
+
+    <p>Please select an option:</p>
+
+    <p><input type="radio" id="def-radio" name="entry-type" value="0" onchange="handleRadio(this)">
+        Existing File</p>
+    <p><input type="radio" name="entry-type" value="2" onchange="handleRadio(this)">
+        Online Editor</p><br>
+
+    <div id="data-entry"></div><br>
+
+    <button id="btn" type="button" onclick="compile();">Click to Compile</button>
+
+    <p id="compile-status"></p>
+
+    <div id="tree-line" class="center" style="max-width:800px"></div>
+    <div id="tree-header" class="center" style="max-width:675px"></div>
+    <div id="tree" class="center" style="max-width:700px"></div>
+
+    <div id="quad-line" class="center" style="max-width:800px"></div>
+    <div id="quad-header" class="center" style="max-width:675px"></div>
+    <div id="quad" class="center" style="max-width:675px"></div>
+    
+    <script src="./controller.js"></script>
+</body>
+
+</html>

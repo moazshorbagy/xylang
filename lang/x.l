@@ -80,8 +80,8 @@ int yylineno ;
 
 %%
 int yyerror(char *msg) {
-  fprintf(stderr,"%s at line %d\n",msg,yylineno);
-  exit(1);
+  printf("{\"Error\": \"%s at line %d\"}\n",msg,yylineno);
+  exit(0);
 }
 int yywrap(void) {
     return 1;

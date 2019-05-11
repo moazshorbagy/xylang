@@ -1,0 +1,17 @@
+main{
+ bool x = true;
+ if(true){
+   int y ;
+   bool x;
+   x=true;
+   y=3;
+   if(x & y==3) {}
+ }
+ int y = 3;
+ int z = 5;
+ 
+ if(x & y==3 & z==5){
+
+ }
+ 
+}

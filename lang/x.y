@@ -1,10 +1,10 @@
 %{
 #include "header.h"
-#include "structures\struct_defs.h"
-#include "structures\SymTable.h"
-#include "structures\SymTable.c"
-#include "structures\SymTree.h"
-#include "structures\SymTree.c"
+#include "structures/struct_defs.h"
+#include "structures/SymTable.h"
+#include "structures/SymTable.c"
+#include "structures/SymTree.h"
+#include "structures/SymTree.c"
 #include "QuadGeneration.c"
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,7 +68,7 @@ struct Tree* tree;
 %%
 
 program	: functions MAIN openbraces  stmtornull	{ printf("valid with functions\n");  }
-		| MAIN openbraces  stmtornull 			{ /*printf("valid\n")*/; fp = fopen ("out.txt","w"); ex($3,0,0,fp,start);fclose (fp);}
+		| MAIN openbraces  stmtornull 			{ /*printf("valid\n")*/; fp = fopen ("quadruples.out","w"); ex($3,0,0,fp,start);fclose (fp);}
 		;
 	
 stmts	: stmts stmt	{$$ = opr(';', 2, $1, $2);}	
@@ -397,14 +397,14 @@ void oprSemanticChecks( nodeType* p){
 	// Different from second operand that it may be initially uninitialized in an assignment or const declaration
 	if(p->opr.op[0] != NULL && p->opr.op[0]->type == typeId && p->opr.oper != '=' && p->opr.oper != CONST && p->opr.oper != DEC && symLookup(currentSymTable, p->opr.op[0]->id.label)->isInitialized == false ){
 		char message [20];
-		sprintf	(message, "Error: usage of uninitialized variable \"%s\"", p->opr.op[0]->id.label );
+		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[0]->id.label );
 		yyerror(message);
 	}
 	
 	
 	if(p->opr.nops > 1 && p->opr.op[1] != NULL && p->opr.op[1]->type == typeId && symLookup(currentSymTable, p->opr.op[1]->id.label)->isInitialized == false ){
 		char message [20];
-		sprintf	(message, "Error: usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
+		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
 		yyerror(message);
 	}
 	
@@ -607,7 +607,7 @@ int main(int argc, char * argv[]){
   yyparse();
   checkUnusedVars(tree);
 
-  //symTablePrint( currentSymTable);
+  printTree(tree);
   
   return 0;
 }
