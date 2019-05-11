@@ -235,7 +235,7 @@ int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
                 fprintf (fp,"\n");
                 fprintf(fp,"%d",rownum);
                 rownum++;
-                fprintf (fp,"\tASSIGN\t %c ", p->opr.op[0]->id.label);
+                fprintf (fp,"\tASSIGN\t %s ", p->opr.op[0]->id.label);
                 int temp = pop(2);
                 fprintf (fp," Temp%d", temp);
                 tempexist = false;
