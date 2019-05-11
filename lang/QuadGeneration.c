@@ -543,13 +543,13 @@ void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper, FILE *fp
         ex(p->opr.op[0], lbl1, lbl2, fp, 1);
         fprintf(fp, "   ");
     }
-    else
+    else if(oper==2)
     {
         fprintf(fp, " Temp%d", valuepop0);
     }
     if (oper == 2 && !doneop1)
         ex(p->opr.op[1], lbl1, lbl2, fp, 1);
-    else
+    else if(oper==2)
     {
         fprintf(fp, " Temp%d", valuepop1);
     }
