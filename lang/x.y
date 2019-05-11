@@ -128,7 +128,8 @@ withVal	: ';'				{$$ = NULL;}
 		
 
 assigndec	: IDENTIFIER '=' expr 				{ $$ = opr('=',2,getid($1, true, false),$3);}
-	 		| type IDENTIFIER '=' expr			{ $$ = opr('=', 2, id($2, variable, $1, true), $4); }
+	 		| type IDENTIFIER '=' expr			{ 	id($2, variable, $1, true);
+				 									$$ = opr('=', 2, getid($2, true, false), $4); }
 			| IDENTIFIER '[' expr ']' '=' expr	
 			;
 
