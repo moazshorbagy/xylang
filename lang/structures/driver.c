@@ -7,51 +7,32 @@
 int main(int argc, char const *argv[])
 {
     struct Tree *T = allocateSymTree();
-    struct SymTable *globalTable = startScope(T);
-    struct SymTable *localTable1 = startScope(T);
-    endScope(T);
     startScope(T);
-    endScope(T);
-    startScope(T);
-    endScope(T);
-    startScope(T);
-    struct SymTable *globalAgain = endScope(T);
-    struct SymTable *localTable5 = startScope(T);
-    endScope(T);
 
     union Value v;
 
     v.intVal = 5;
     symInsert(T->currSymTable, "var1", variable, typeint);
+    struct Symbol *symbol = symLookup(T->currSymTable, "var1");
     symUpdate(T->currSymTable, "var1", true, true, &v);
 
     v.intVal = 20;
     symInsert(T->currSymTable, "var2", variable, typeint);
     symUpdate(T->currSymTable, "var2", true, true, &v);
 
-    struct Symbol *sym1 = symLookup(T->currSymTable, "var1");
-    if (sym1)
-        printf("Retrieved Symbol:\nlabel: %s\nvalue: %d\n\n", sym1->label, (int)sym1->symValue->intVal);
+    startScope(T);
 
-    struct Symbol *sym2 = symLookup(T->currSymTable, "var2");
-    if (sym2)
-        printf("Retrieved Symbol:\nlabel: %s\nvalue: %d\n\n", sym2->label, (int)sym2->symValue->intVal);
+    v.intVal = 80;
+    symInsert(T->currSymTable, "var1", variable, typeint);
+    symUpdate(T->currSymTable, "var1", true, true, &v);
 
-    symTablePrint(T->currSymTable);
+    v.intVal = 320;
+    symInsert(T->currSymTable, "var4", variable, typeint);
+    symUpdate(T->currSymTable, "var4", true, true, &v);
 
-    printf("Number of local scopes: %d\n", T->currSymTable->addChildIndex);
-    for (int i = 0; i < T->currSymTable->addChildIndex; i++)
-    {
-        printf("%p\n", T->currSymTable->children[i]);
-    }
+    printTree(T);
 
-    printf("Global Table: %p\n", globalTable);
-    printf("Local 1 Table: %p\n", localTable1);
-    printf("Should be Global: %p\n", globalAgain);
-    printf("Local 5 Table: %p\n", localTable5);
-    printf("Parent of Local 1 (should be Global): %p\n", localTable1->parent);
-    printf("Parent of Local 5 (should be Global): %p\n", localTable5->parent);
-    printf("Parent of global (should be nil): %p\n", globalTable->parent);
+    printf("Hit count: %d\n", hitCount(T, "var6"));
 
     int *p0;
     int *p1;
