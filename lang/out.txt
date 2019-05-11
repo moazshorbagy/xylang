@@ -1,2 +1,4 @@
-1	DECVAR   y
-2	ASSIGN	 y  "hi"
+1	DECVAR   x
+2	ASSIGN	 x  0
+3
+4

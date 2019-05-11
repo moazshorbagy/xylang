@@ -18,7 +18,7 @@ extern int yylex();
 //prototypes
 nodeType *con(conTypeEnum type,union Value);
 nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized);
-nodeType *getid(char* value);
+nodeType *getid(char* value, bool, bool);
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
 int ex(nodeType *p,int lbl1,int lbl2,FILE *fp,int start);
