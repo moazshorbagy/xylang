@@ -124,7 +124,7 @@ void symTablePrint(struct SymTable *table)
         if (table->symTable[i] != NULL)
         {
             printf("label: %s index: %d", table->symTable[i]->label, i);
-            if (table->symTable[i]->isInitialized)
+            /*if (table->symTable[i]->isInitialized)
                 switch (table->symTable[i]->datatype)
                 {
                 case typeint:
@@ -145,7 +145,7 @@ void symTablePrint(struct SymTable *table)
 
                 default:
                     break;
-                }
+                }*/
             printf("\n");
         }
     }
