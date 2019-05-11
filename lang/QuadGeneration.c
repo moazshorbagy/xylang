@@ -107,7 +107,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
 
             ex(p->opr.op[1], lbl1, lbl2, fp, 1);
             int popjmp = pop(0);
-            fprintf(fp, "\tjmp\tL%03d\n", popjmp);
+            fprintf(fp, "\tJMP\tL%03d\n", popjmp);
 
             int popcon = pop(1);
             fprintf(fp, "L%03d:\n", popcon);
@@ -133,7 +133,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
 
             ex(p->opr.op[2], lbl1, lbl2, fp, 1);
             int popjmpfor = pop(0);
-            fprintf(fp, "\tjmp\tL%03d\n", popjmpfor);
+            fprintf(fp, "\tJMP\tL%03d\n", popjmpfor);
 
             int popconfor = pop(1);
             fprintf(fp, "L%03d:\n", popconfor);
@@ -166,7 +166,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
             fprintf(fp, " L%03d\n", lbl2);
 
             int popjmpdo = pop(0);
-            fprintf(fp, "\tjmp\tL%03d\n", popjmpdo);
+            fprintf(fp, "\tJMP\tL%03d\n", popjmpdo);
 
             int popdo = pop(1);
             fprintf(fp, "L%03d:\n", popdo);
@@ -265,7 +265,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
                 ex(p->opr.op[0], lbl1, lbl2, fp, 1);
                 lbl2 = lbl++;
                 push(lbl2, 1);
-                fprintf(fp, "\tjmp\tL%03d\n", lbl2);
+                fprintf(fp, "\tJMP\tL%03d\n", lbl2);
 
                 int lbl3 = pop(0);
                 fprintf(fp, "L%03d:\n", lbl3);
@@ -280,22 +280,22 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
             {
                 //*********************************************************************************************************
             case '+':
-                expresion(p, "add  ", lbl1, lbl2, 2, fp);
+                expresion(p, "ADD  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '-':
-                expresion(p, "sub  ", lbl1, lbl2, 2, fp);
+                expresion(p, "SUB  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '*':
-                expresion(p, "mult  ", lbl1, lbl2, 2, fp);
+                expresion(p, "MULT  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '/':
-                expresion(p, "div  ", lbl1, lbl2, 2, fp);
+                expresion(p, "DIV  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
@@ -306,7 +306,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
                 //*********************************************************************************************************
                 //AND w OR fehom moshkela
             case '&':
-                expresion(p, "And  ", lbl1, lbl2, 2, fp);
+                expresion(p, "AND  ", lbl1, lbl2, 2, fp);
                 break;
                 //*********************************************************************************************************
             case '|':
@@ -315,7 +315,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
 
                 //*********************************************************************************************************
             case '<':
-                expresion(p, "CompLT  ", lbl1, lbl2, 2, fp);
+                expresion(p, "compLT  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
