@@ -75,17 +75,17 @@ stmts	: stmts stmt	{$$ = opr(';', 2, $1, $2);}
 		| stmt			{$$ = $1;}
 		;
 
-stmt	: decConstant 				{ printf("decConst\n"); $$ = $1; }
-		| decVar 					{ printf("decVar\n"); $$ = $1;}
-		| assign ';' 				{ printf("assignment\n"); $$ = $1; }
-		| whilestmt 				{ printf("while\n"); $$ = $1;}
-		| dowhilestmt 				{ printf("do\n"); $$ = $1;}
-		| forloopstmt  				{ printf("for\n"); $$ = $1;}
-		| switchcase 				{ printf("switch\n"); $$ = $1;}
-		| matched 					{ printf("if\n"); $$ = $1;}
-		| decArr 					{ printf("dec array\n"); }
-		| return 					{ printf("return\n"); }
-		| funccall ';' 				{ printf("func call\n"); }
+stmt	: decConstant 				{ $$ = $1; }
+		| decVar 					{ $$ = $1;}
+		| assign ';' 				{  $$ = $1; }
+		| whilestmt 				{  $$ = $1;}
+		| dowhilestmt 				{  $$ = $1;}
+		| forloopstmt  				{  $$ = $1;}
+		| switchcase 				{  $$ = $1;}
+		| matched 					{  $$ = $1;}
+		| decArr 					{  }
+		| return 					{  }
+		| funccall ';' 				{  }
 		| openbraces stmtornull		{$$ = $2;}
 		;
 	
