@@ -67,8 +67,8 @@ struct Tree* tree;
 //INT FLOAT BOOL STRING
 %%
 
-program	: functions MAIN openbraces  stmts closebraces	{ printf("valid with functions\n");  }
-		| MAIN openbraces  stmts closebraces 			{ /*printf("valid\n")*/; fp = fopen ("out.txt","w"); ex($3,0,0,fp,start);fclose (fp);}
+program	: functions MAIN openbraces  stmtornull	{ printf("valid with functions\n");  }
+		| MAIN openbraces  stmtornull 			{ /*printf("valid\n")*/; fp = fopen ("out.txt","w"); ex($3,0,0,fp,start);fclose (fp);}
 		;
 	
 stmts	: stmts stmt	{$$ = opr(';', 2, $1, $2);}	
@@ -401,7 +401,7 @@ void oprSemanticChecks( nodeType* p){
 	// Check for usage of uninitialized variables
 	// Check the first operand
 	// Different from second operand that it may be initially uninitialized in an assignment or const declaration
-	if(p->opr.op[0]->type == typeId && p->opr.oper != '=' && p->opr.oper != CONST && p->opr.oper != DEC && symLookup(currentSymTable, p->opr.op[0]->id.label)->isInitialized == false ){
+	if(p->opr.op[0] != NULL && p->opr.op[0]->type == typeId && p->opr.oper != '=' && p->opr.oper != CONST && p->opr.oper != DEC && symLookup(currentSymTable, p->opr.op[0]->id.label)->isInitialized == false ){
 		char message [20];
 		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[0]->id.label );
 		yyerror(message);
