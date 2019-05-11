@@ -71,7 +71,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
 
         //*********************************************************************************************************
     case typeId:
-        fprintf(fp, " %s", (p->id.label));
+        fprintf(fp, " %s_%d  ", (p->id.label),(p->id.subscript));
         break;
         //*********************************************************************************************************
 
@@ -90,7 +90,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
             }
             else
             {
-                fprintf(fp, "\tcompEQ");
+                fprintf(fp, "\tcompEQ  ");
                 ex(p->opr.op[0], lbl1, lbl2, fp, 1);
                 fprintf(fp, " true");
                 push(tempval, 2);
@@ -151,7 +151,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
                 ex(p->opr.op[1], lbl1, lbl2, fp, 1);
             else
             {
-                fprintf(fp, "\tcompEQ");
+                fprintf(fp, "\tcompEQ  ");
                 ex(p->opr.op[1], lbl1, lbl2, fp, 1);
                 fprintf(fp, " true");
                 push(tempval, 2);
@@ -183,7 +183,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
             }
             else
             {
-                fprintf(fp, "\tcompEQ");
+                fprintf(fp, "\tcompEQ  ");
                 ex(p->opr.op[0], lbl1, lbl2, fp, 1);
                 fprintf(fp, " true");
                 push(tempval, 2);
@@ -241,14 +241,16 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
                 ex(p->opr.op[1], lbl1, lbl2, fp, 1);
                 fprintf(fp, "\n");
 
-                fprintf(fp, "\tASSIGN\t %s ", p->opr.op[0]->id.label);
+                fprintf(fp, "\tASSIGN\t ");
+                ex(p->opr.op[0], lbl1, lbl2, fp, 1);
                 int temp = pop(2);
                 fprintf(fp, " Temp%d", temp);
                 tempexist = false;
             }
             else
             {
-                fprintf(fp, "\tASSIGN\t %s ", p->opr.op[0]->id.label);
+                fprintf(fp, "\tASSIGN\t");
+                ex(p->opr.op[0], lbl1, lbl2, fp, 1);
                 ex(p->opr.op[1], lbl1, lbl2, fp, 1);
             }
             fprintf(fp, "\n");
@@ -278,67 +280,67 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
             {
                 //*********************************************************************************************************
             case '+':
-                expresion(p, "add", lbl1, lbl2, 2, fp);
+                expresion(p, "add  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '-':
-                expresion(p, "sub", lbl1, lbl2, 2, fp);
+                expresion(p, "sub  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '*':
-                expresion(p, "mult", lbl1, lbl2, 2, fp);
+                expresion(p, "mult  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '/':
-                expresion(p, "div", lbl1, lbl2, 2, fp);
+                expresion(p, "div  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '~':
-                expresion(p, "NEG", lbl1, lbl2, 1, fp);
+                expresion(p, "NEG  ", lbl1, lbl2, 1, fp);
                 break;
 
                 //*********************************************************************************************************
                 //AND w OR fehom moshkela
             case '&':
-                expresion(p, "And", lbl1, lbl2, 2, fp);
+                expresion(p, "And  ", lbl1, lbl2, 2, fp);
                 break;
                 //*********************************************************************************************************
             case '|':
-                expresion(p, "OR", lbl1, lbl2, 2, fp);
+                expresion(p, "OR  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '<':
-                expresion(p, "CompLT", lbl1, lbl2, 2, fp);
+                expresion(p, "CompLT  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case '>':
-                expresion(p, "compGT", lbl1, lbl2, 2, fp);
+                expresion(p, "compGT  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case COND_GREQ:
-                expresion(p, "compGTEQ", lbl1, lbl2, 2, fp);
+                expresion(p, "compGTEQ  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
             case COND_LSEQ:
-                expresion(p, "compLTEQ", lbl1, lbl2, 2, fp);
+                expresion(p, "compLTEQ  ", lbl1, lbl2, 2, fp);
                 break;
                 //*********************************************************************************************************
 
             case COND_NEQ:
-                expresion(p, "compNEQ", lbl1, lbl2, 2, fp);
+                expresion(p, "compNEQ  ", lbl1, lbl2, 2, fp);
                 break;
                 //*********************************************************************************************************
 
             case COND_EQ:
-                expresion(p, "compEQ", lbl1, lbl2, 2, fp);
+                expresion(p, "compEQ  ", lbl1, lbl2, 2, fp);
                 break;
 
                 //*********************************************************************************************************
@@ -364,7 +366,7 @@ int ex(nodeType *p, int lbl1, int lbl2, FILE *fp, int start)
                 int tempexp2;
                 fprintf(fp, "\n");
 
-                fprintf(fp, "\t%s", "compEQ");
+                fprintf(fp, "\t%s", "compEQ  ");
                 if (switchexp)
                     fprintf(fp, " Temp%d", tempexp);
                 else
@@ -541,7 +543,7 @@ void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper, FILE *fp
     if (!doneop0)
     {
         ex(p->opr.op[0], lbl1, lbl2, fp, 1);
-        fprintf(fp, "   ");
+        fprintf(fp, "  ");
     }
     else if(oper==2)
     {

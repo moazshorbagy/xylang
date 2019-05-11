@@ -58,7 +58,7 @@ struct Tree* tree;
 
 //%type
 
-%type <nPtr>  expr cond assign stmtornull whilestmt stmts stmt dowhilestmt assigndec forloopcont forloopstmt ifcont matched decConstant withVal decVar stmtornull2 switching cases switchcase
+%type <nPtr>  expr assign stmtornull whilestmt stmts stmt dowhilestmt assigndec forloopcont forloopstmt ifcont matched decConstant withVal decVar stmtornull2 switching cases switchcase
 %type <conType> type
 %token <conType> INT
 %token <conType> FLOAT
@@ -212,21 +212,6 @@ expr	: 	INT_VAL   			{union Value x; x.intVal=$1; $$=con(typeint,x);}
 		| funccall
 		;
 
-cond	: cond '&' cond 		{$$ = opr('&', 2, $1, $3);}
-		| cond '|' cond			{$$ = opr('|', 2, $1, $3);}
-		| cond '<' cond			{$$ = opr('<', 2, $1, $3);}
-		| cond COND_GREQ cond	{$$ = opr(COND_GREQ, 2, $1, $3);}
-		| cond '>' cond			{$$ = opr('>', 2, $1, $3);}
-		| cond COND_LSEQ cond	{$$ = opr(COND_LSEQ, 2, $1, $3);}
-		| cond COND_EQ cond		{$$ = opr(COND_EQ, 2, $1, $3);}
-		| cond COND_NEQ cond	{$$ = opr(COND_NEQ, 2, $1, $3);}
-		| '(' cond ')'			{$$=$2;}
-		| IDENTIFIER			{$$ = getid($1, false, true);}
-		| IDENTIFIER '[' expr ']'
-		| BOOL_VAL				{union Value x; x.boolVal=$1; $$=con(typebool,x);}
-		| INT_VAL				{union Value x; x.intVal=$1; $$=con(typeint,x);}
-		| FLOAT_VAL				{union Value x; x.floatVal=$1; $$=con(typefloat,x);}
-		;
 
 	
 stmtornull	: stmts closebraces	{$$ = $1;}
