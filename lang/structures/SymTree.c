@@ -3,6 +3,7 @@
 #include "SymTree.h"
 #include "SymTable.h"
 #include "Queue.h"
+#include "Queue.c"
 
 struct Tree *allocateSymTree()
 {

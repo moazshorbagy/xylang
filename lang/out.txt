@@ -1,23 +1,10 @@
-1	DECVAR   y
-2	ASSIGN	 y  0
-3
-4	DECVAR   x
-5	ASSIGN	 x  0.0000
-6
-7L000:
-8
-9	CompLT x    10.0000 Temp0 
-1011	JZ Temp0 L001
-12	DECVAR   g
-13	ASSIGN	 g  0
-14
-15	jmp	L000
-16L001:
-17	DECCONST   t 2
-18	DECVAR   n
-19	ASSIGN	 n  t
-20
-21	DECVAR   sleeping
-22	ASSIGN	 sleeping false
-23
-24
+	DECVAR   x
+	ASSIGN	 x true
+
+	compEQtrue true Temp0
+
+	JZ Temp0  L000
+	DECVAR   y
+	DECVAR   x
+L000:
+	DECVAR   y

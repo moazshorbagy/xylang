@@ -35,6 +35,8 @@ struct Symbol
     bool isInitialized;
     bool isUsed;
     struct SymTable *myTable; // the table where the symbol is stored
+    int subscript;            /* Allows for differentiation between variables
+                                with same name in different scopes */
 };
 
 struct SymTable

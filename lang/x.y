@@ -330,17 +330,23 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized)
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
 	}
-	 
-	int flag = symInsert(currentSymTable, label, type, dataType);
+
+	// Try to insert the new identifier into the parse tree
+	int flag = symInsert(currentSymTable, label, type, dataType, tree);
 	
 	if(flag == -1){
-		yyerror("\nRedeclaration\n");
+		char message [50];
+		sprintf	(message,"Error: duplicate declaration of variable %s",label);
+		yyerror(message);
 	}
+
+	// Get the symbol just added, to know thw subscript
+	struct Symbol* sym= symLookup(currentSymTable, label);
 
 	p->type = typeId;
 	p->id.label = label;
     p->id.symTablePtr = currentSymTable;
-	
+	p->id.subscript = sym->subscript;
 	p->retType = dataType;
 	
 	 return p;
@@ -359,13 +365,16 @@ nodeType *getid(char* value, bool setInitilized, bool setUsed) {
 	struct Symbol* sym= symLookup(currentSymTable, value);
 
 	if(sym == NULL){
-		yyerror("var not found");
+		char message [50];
+		sprintf	(message,"Error: Referencing an undeclared variable \"%s\"", value);
+		yyerror(message);
 	}else{
      /* copy information */
 		p->type = typeId;
 		p->id.label = value;
 		p->id.symTablePtr = sym->myTable;
 		p->retType = sym->datatype;
+		p->id.subscript = sym->subscript;
 	}
 	 
     return p;
@@ -403,14 +412,14 @@ void oprSemanticChecks( nodeType* p){
 	// Different from second operand that it may be initially uninitialized in an assignment or const declaration
 	if(p->opr.op[0] != NULL && p->opr.op[0]->type == typeId && p->opr.oper != '=' && p->opr.oper != CONST && p->opr.oper != DEC && symLookup(currentSymTable, p->opr.op[0]->id.label)->isInitialized == false ){
 		char message [20];
-		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[0]->id.label );
+		sprintf	(message, "Error: usage of uninitialized variable \"%s\"", p->opr.op[0]->id.label );
 		yyerror(message);
 	}
 	
 	
 	if(p->opr.nops > 1 && p->opr.op[1] != NULL && p->opr.op[1]->type == typeId && symLookup(currentSymTable, p->opr.op[1]->id.label)->isInitialized == false ){
 		char message [20];
-		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
+		sprintf	(message, "Error: usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
 		yyerror(message);
 	}
 	
@@ -544,25 +553,28 @@ void oprSemanticChecks( nodeType* p){
 
 		}
 	}
+
 	// Check CASE ==> return the type of the expr
 	else if (p->opr.oper == CASE){
 		p->retType = p->opr.op[0]->retType;
 	}
+
 	// Check for CASE_JOIN that expr types are the same
 	else if(p->opr.oper == CASE_JOIN){
 		// Check types are equal
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			yyerror("\ncases types not equal");
+			yyerror("(Switch) usage error : cases type mismatch");
 		}
 	}
+
 	// Check for SWITCH : expr type is same as inner expressions
 	else if(p->opr.oper == SWITCH){
 		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
 			p->retType = typevoid;
 		}else{
-			yyerror("\nswitch and cases types not equal");
+			yyerror("(Switch) usage error : cases and switch type mismatch");
 		}
 	}	
 

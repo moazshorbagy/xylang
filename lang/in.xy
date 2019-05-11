@@ -1,14 +1,13 @@
 main{
-  int y = 0;
-  for(float x = 0.0; x<10.0;){
-    int g=0;
-  }
-  if(y==0)
-  {
-    
-  }
-  const int t = 2;
-  int n = t;
-  bool sleeping = false;
+ bool x = true;
+ if(true){
+   int y ;
+   bool x;
+ }
+ int y;
+ 
+ if(y){
 
+ }
+ 
 }

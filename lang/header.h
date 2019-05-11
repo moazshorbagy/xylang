@@ -27,6 +27,9 @@ typedef struct {
 	char* label;
 	// Pointer to the symbol table where this identifier lies
 	struct SymTable* symTablePtr;  
+	/* Subscript added as string to the ned of the variable name to allow
+	** for differentiation between different scopes */
+	int subscript;
 }idNodeType;
 
 

@@ -61,7 +61,7 @@ struct Symbol *symLookup(struct SymTable *table, char *label)
     return tempTable->symTable[tempHashIndex];
 }
 
-int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum datatype)
+int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum datatype, struct Tree * tree)
 {
     if (table->symbolsCount == TABLE_SIZE - 1)
         return -1;
@@ -91,6 +91,7 @@ int symInsert(struct SymTable *table, char *label, Type type, conTypeEnum dataty
     symbol->isUsed = false;
     symbol->symValue = NULL;
     symbol->myTable = table;
+    symbol->subscript = hitCount(tree, label);
 
     // adding the new symbol to the specified symTable
     table->symTable[hashIndex] = symbol;
