@@ -8,10 +8,8 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
+//azwd if (y) w while (y) SCOPES
 
-// check
-// int y=0;
-//     bool x = y>=0 & (y==0 | y!=0);
 //*********************************************************************************************************
 //*********************************************************************************************************
 //*********************************************************************************************************
@@ -76,7 +74,7 @@ int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
         if (p->con.type == typeint)
             fprintf (fp," %d", p->con.intVal);
         else if (p->con.type == typebool)
-            fprintf (fp,p->con.boolVal ? "true" : "false");
+            fprintf (fp,p->con.boolVal ? "false" : "true");
         else if (p->con.type == typefloat)
             fprintf (fp," %.4f", p->con.floatVal);
         else if (p->con.type == typestring)
@@ -101,7 +99,7 @@ int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
             fprintf(fp,"%d",rownum);
             rownum++;
             ex(p->opr.op[0], lbl1, lbl2,fp,1);
-            fprintf (fp,"\n%d\tJNEQ",rownum);
+            fprintf (fp,"\n%d\tJZ",rownum);
             rownum++;
             int tempwhile = pop(2);
             fprintf (fp," Temp%d", tempwhile);
@@ -131,7 +129,7 @@ int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
             fprintf(fp,"%d",rownum);
             rownum++;
             ex(p->opr.op[1], lbl1, lbl2,fp,1);
-            fprintf (fp,"\n%d\tJNEQ",rownum);
+            fprintf (fp,"%d\tJZ",rownum);
             rownum++;
             int tempfor = pop(2);
             fprintf (fp," Temp%d", tempfor);
@@ -160,7 +158,7 @@ int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
             rownum++;
             ex(p->opr.op[0], lbl1, lbl2,fp,1);
             ex(p->opr.op[1], lbl1, lbl2,fp,1);
-            fprintf (fp,"\n%d\tJNEQ",rownum);
+            fprintf (fp,"\n%d\tJZ",rownum);
             rownum++;
             int tempdo = pop(2);
             fprintf (fp," Temp%d", tempdo);
@@ -184,7 +182,7 @@ int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
             ex(p->opr.op[0], lbl1, lbl2,fp,1);
             /* if else */
             lbl1 = lbl++;
-            fprintf (fp,"\n%d\tJNEQ",rownum);
+            fprintf (fp,"\n%d\tJZ",rownum);
             rownum++;
             int temp = pop(2);
             fprintf (fp," Temp%d", temp);
@@ -385,7 +383,7 @@ int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
                 fprintf (fp,"\n");
                 fprintf(fp,"%d",rownum);
                 rownum++;
-                fprintf (fp,"\tJNEQ");
+                fprintf (fp,"\tJZ");
                 int tempswitch = pop(2);
                 fprintf (fp," Temp%d", tempswitch);
                 lbl2 = lbl++;
@@ -417,7 +415,7 @@ int ex(nodeType *p, int lbl1, int lbl2,FILE *fp,int start)
 
                 if (p->opr.nops == 1)
                 {
-                    
+                    fprintf (fp,"\tDECVAR  ");
                     ex(p->opr.op[0], lbl1, lbl2,fp,1);
                 }
                 else
@@ -532,6 +530,7 @@ void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper,FILE *fp)
         ex(p->opr.op[0], lbl1, lbl2,fp,1);
         valuepop0 = pop(2);
         doneop0 = true;
+        
     }
     if (p->opr.op[1]->type == typeOpr)
     {
@@ -546,6 +545,7 @@ void expresion(nodeType *p, char *string, int lbl1, int lbl2, int oper,FILE *fp)
     if (!doneop0)
     {
         ex(p->opr.op[0], lbl1, lbl2,fp,1);
+        fprintf (fp,"   ");
     }
     else
     {
