@@ -5,22 +5,25 @@
 #include "structures\SymTable.c"
 #include "structures\SymTree.h"
 #include "structures\SymTree.c"
+#include "QuadGeneration.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
 
+
 int yyerror(char*);
 extern int yylex(); 
 //prototypes
 nodeType *con(conTypeEnum type,union Value);
-nodeType *id(char*  label, Type type, conTypeEnum dataType);
-nodeType *getid(char* value);
+nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized);
+nodeType *getid(char* value, bool, bool);
 nodeType *opr(int oper, int nops, ...);
 void oprSemanticChecks( nodeType* p);
-
-
+int ex(nodeType *p,int lbl1,int lbl2,FILE *fp,int start);
+int start=0;
+FILE *fp;
 struct SymTable* currentSymTable;
 struct Tree* tree;
 %}
@@ -44,7 +47,7 @@ struct Tree* tree;
 %token <strVal> IDENTIFIER
 %token <boolVal> BOOL_VAL
 %token CONST  COND_EQ  COND_GREQ COND_LSEQ COND_NEQ WHILE IF ELSE DO FOR SWITCH CASE DEFAULT VOID RETURN FUNCTION MAIN 
-%token CASE_JOIN
+%token CASE_JOIN DEC
 
 %start  program
 // Associativity rules
@@ -64,8 +67,8 @@ struct Tree* tree;
 //INT FLOAT BOOL STRING
 %%
 
-program	: functions MAIN openbraces  stmts closebraces	{ printf("valid with functions\n");  }
-		| MAIN openbraces  stmts closebraces 			{ printf("valid\n"); }
+program	: functions MAIN openbraces  stmtornull	{ printf("valid with functions\n");  }
+		| MAIN openbraces  stmtornull 			{ /*printf("valid\n")*/; fp = fopen ("out.txt","w"); ex($3,0,0,fp,start);fclose (fp);}
 		;
 	
 stmts	: stmts stmt	{$$ = opr(';', 2, $1, $2);}	
@@ -100,14 +103,21 @@ multipleExpr	: expr
 				| multipleExpr ',' expr
 				;
 
-decConstant :  CONST type IDENTIFIER '=' expr ';'		{ $$ = opr(CONST, 2, id($3, constVariable, $2), $5); }
+decConstant :  CONST type IDENTIFIER '=' expr ';'		{ 	id($3, constVariable, $2, true);
+															$$ = opr(CONST, 2, getid($3, true, false), $5); }
 			;
 
-decVar	: type IDENTIFIER withVal						{ if($3==NULL){
-																 id($2, variable, $1);
-																}
+decVar	: type IDENTIFIER withVal						{ if($3==NULL)
+															{
+																
+																id($2, variable, $1,false);
+																$$=opr(DEC,1,getid($2, false, false));
+																
+															}
 															else{
-																 $$ = opr('=', 2, id($2, variable, $1), $3); 
+																id($2, variable,$1,true);
+																$$=opr(DEC,2,getid($2, true, false),opr('=', 2, getid($2, true, false), $3));
+
 															}
 														}
 		;
@@ -117,38 +127,39 @@ withVal	: ';'				{$$ = NULL;}
 		;
 		
 
-assigndec	: IDENTIFIER '=' expr 				{ $$ = opr('=',2,getid($1),$3);}
-	 		| type IDENTIFIER '=' expr			{ $$ = opr('=', 2, id($2, variable, $1), $4); }
+assigndec	: IDENTIFIER '=' expr 				{ $$ = opr('=',2,getid($1, true, false),$3);}
+	 		| type IDENTIFIER '=' expr			{ 	id($2, variable, $1, true);
+				 									$$ = opr(DEC,2,getid($2, true, false), opr('=', 2, getid($2, true, false), $4)); }
 			| IDENTIFIER '[' expr ']' '=' expr	
 			;
 
 
 	/* Assignments */
 	
-assign	: IDENTIFIER '=' expr					{ $$ = opr('=',2,getid($1),$3);}
+assign	: IDENTIFIER '=' expr					{ $$ = opr('=',2,getid($1, true, false),$3);}
 		| IDENTIFIER '[' expr ']' '=' expr
 		;
 
 
 	/* Conditional if-else */
 
-matched	: IF '(' cond ')' ifcont				{ $$ = opr(IF, 2,  $3, $5);}
+matched	: IF '(' expr ')' ifcont				{ $$ = opr(IF, 2,  $3, $5);}
 		;
 		
-ifcont	: openbraces  stmtornull 									{ $$ = $2;}
+ifcont	: openbraces  stmtornull 									{ $$ = $2; }
 		| openbraces  stmtornull  ELSE openbraces stmtornull		{ $$ = opr(ELSE, 2, $2, $5);}
 		;
 		
 		
 	/* Loops */
 
-whilestmt	: WHILE '(' cond ')' openbraces stmtornull 				{ $$ = opr(WHILE, 2, $3, $6);}
+whilestmt	: WHILE '(' expr ')' openbraces stmtornull 				{ $$ = opr(WHILE, 2, $3, $6);}
 			;
 
-dowhilestmt	: DO openbraces  stmtornull WHILE '(' cond ')' ';'		{ $$ = opr(DO, 2, $3, $6);}
+dowhilestmt	: DO openbraces  stmtornull WHILE '(' expr ')' ';'		{ $$ = opr(DO, 2, $3, $6);}
 			;
 
-forloopstmt	: FOR '(' assigndec ';' cond ';' forloopcont			{ $$ = opr(FOR, 3, $3, $5, $7);}
+forloopstmt	: FOR '(' assigndec ';' expr ';' forloopcont			{ $$ = opr(FOR, 3, $3, $5, $7);}
 			;
 
 forloopcont	: assign ')' openbraces  stmtornull						{ $$ = opr(';', 2, $4, $1);}
@@ -183,7 +194,7 @@ expr	: 	INT_VAL   			{union Value x; x.intVal=$1; $$=con(typeint,x);}
 		| BOOL_VAL				{union Value x; x.boolVal=$1; $$=con(typebool,x);}
 		| STRING_VAL			{union Value x; x.strVal=$1; $$=con(typestring,x);}
 		|'~'expr				{$$ = opr('~', 1, $2);}
-		| IDENTIFIER			{$$ = getid($1);}
+		| IDENTIFIER			{$$ = getid($1, false, true);}
 		| IDENTIFIER '[' expr ']'{}
 		| expr '+' expr	 		{$$ = opr('+', 2, $1, $3);}
 		| expr '-' expr  		{$$ = opr('-', 2, $1, $3);}
@@ -210,7 +221,7 @@ cond	: cond '&' cond 		{$$ = opr('&', 2, $1, $3);}
 		| cond COND_EQ cond		{$$ = opr(COND_EQ, 2, $1, $3);}
 		| cond COND_NEQ cond	{$$ = opr(COND_NEQ, 2, $1, $3);}
 		| '(' cond ')'			{$$=$2;}
-		| IDENTIFIER			{$$ = getid($1);}
+		| IDENTIFIER			{$$ = getid($1, false, true);}
 		| IDENTIFIER '[' expr ']'
 		| BOOL_VAL				{union Value x; x.boolVal=$1; $$=con(typebool,x);}
 		| INT_VAL				{union Value x; x.intVal=$1; $$=con(typeint,x);}
@@ -273,9 +284,9 @@ return	: RETURN expr ';'
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 
-openbraces : '{'					  { printf("openbraces\n"); currentSymTable = startScope(tree);} 
+openbraces : '{'					  { currentSymTable = startScope(tree);} 
 	;
-closebraces : '}'					  { printf("closebraces\n"); symTablePrint(currentSymTable); currentSymTable = endScope(tree);}
+closebraces : '}'					  { currentSymTable = endScope(tree);}
 	; 
 
 %%
@@ -312,8 +323,10 @@ nodeType *con(conTypeEnum type, union Value value) {
     return p; 
 }
 
-nodeType *id(char*  label, Type type, conTypeEnum dataType) {
-    nodeType *p;     /* allocate node */
+nodeType *id(char*  label, Type type, conTypeEnum dataType, bool setInitialized) {
+    
+	
+	nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL){
          yyerror("out of memory");
 	}
@@ -321,7 +334,7 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType) {
 	int flag = symInsert(currentSymTable, label, type, dataType);
 	
 	if(flag == -1){
-		printf("\nRedeclaration\n");
+		yyerror("\nRedeclaration\n");
 	}
 
 	p->type = typeId;
@@ -333,16 +346,20 @@ nodeType *id(char*  label, Type type, conTypeEnum dataType) {
 	 return p;
  } 
 
-nodeType *getid(char* value) {
+nodeType *getid(char* value, bool setInitilized, bool setUsed) {
 	
     nodeType *p;     /* allocate node */
     if ((p = malloc(sizeof(nodeType))) == NULL)
          yyerror("out of memory");
-	//look up the symbol table to get values
+
+	// Update the variable with initializtaion/usage info
+	symUpdate(currentSymTable, value, setInitilized, setUsed, NULL);
+	
+	// look up the symbol table to get values
 	struct Symbol* sym= symLookup(currentSymTable, value);
 
 	if(sym == NULL){
-		printf("var not found\n");
+		yyerror("var not found");
 	}else{
      /* copy information */
 		p->type = typeId;
@@ -374,37 +391,49 @@ nodeType *opr(int oper, int nops, ...) {
         p->opr.op[i] = va_arg(ap, nodeType*);
     va_end(ap);
 	
-	// if(oper==WHILE){
-	// 	//printf("\nWHILEEEEEEEEE\n %c \n %d\n", p->opr.op[0]->opr.oper, p->opr.op[1]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
-	// }
-	// if(oper==DO){
-	// 	printf("\nDOOOOOO\n %d \n %d\n",  p->opr.op[0]->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal, p->opr.op[1]->opr.op[1]->con.intVal);//p->opr.op[1]->opr.op[1]->opr.op[1]->con.intVal );
-	// }
-
-	// /*if(oper==FOR){
-	// 	printf("\nfor\n %c \n\n", p->opr.op[2]->opr.op[1]->opr.op[1]->opr.oper ); 
-	// }*/
-
-	// if(oper==IF){
-	// 	printf("\nIFFFFFFFFF\n %d\n\n" , p->opr.op[1]->opr.op[0]->opr.op[1]->con.intVal );
-	// }
-	
-	
-	//TODO: Semantic checks
 	oprSemanticChecks(p);
 
     return p;
  } 
 
 void oprSemanticChecks( nodeType* p){
+
+	// Check for usage of uninitialized variables
+	// Check the first operand
+	// Different from second operand that it may be initially uninitialized in an assignment or const declaration
+	if(p->opr.op[0] != NULL && p->opr.op[0]->type == typeId && p->opr.oper != '=' && p->opr.oper != CONST && p->opr.oper != DEC && symLookup(currentSymTable, p->opr.op[0]->id.label)->isInitialized == false ){
+		char message [20];
+		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[0]->id.label );
+		yyerror(message);
+	}
+	
+	
+	if(p->opr.nops > 1 && p->opr.op[1] != NULL && p->opr.op[1]->type == typeId && symLookup(currentSymTable, p->opr.op[1]->id.label)->isInitialized == false ){
+		char message [20];
+		sprintf	(message, "usage of uninitialized variable \"%s\"", p->opr.op[1]->id.label );
+		yyerror(message);
+	}
 	
 	// Arithmetic check : types are same and are numbers //
 	if(p->opr.oper == '+' || p->opr.oper == '-' || p->opr.oper == '*' || p->opr.oper == '/' ){
-		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
-			p->retType = p->opr.op[0]->retType;
+		
+		// Check types are same
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType) {
+			
+			// Check type is integer or float
+			if((p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
+				p->retType = p->opr.op[0]->retType;
+			}else{
+				char message [50];
+				sprintf	(message, "(%c) usage error :  unallowed types", p->opr.oper );
+				yyerror(message);
+			}
 		}else{
-			printf("\n+ - * / error\n");
-			yyerror("wrong");
+			
+			char message [50];
+			sprintf	(message, "(%c) usage error :  type mismatch", p->opr.oper );
+			yyerror(message);
+			
 		}
 		
 	}
@@ -412,60 +441,106 @@ void oprSemanticChecks( nodeType* p){
 	// Logical expressions //
 	// Check for == or != 
 	else if( p->opr.oper == COND_EQ || p->opr.oper == COND_NEQ){
-		// Check types equal and are numbers or booleans
-		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint 
-		|| p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool)){
-			p->retType = p->opr.op[0]->retType;
-		}else{
-			printf("\n== != error\n");
+		
+		// Check type mismatch
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+			
+			// Check types are bool, int or float
+			if(p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat || p->opr.op[1]->retType == typebool){
+				p->retType = typebool;
+			}else{
+				char message [50];
+				sprintf	(message, "(%s) usage error :  unallowed types", p->opr.oper == COND_EQ ? "==" : "!=" );
+				yyerror(message);
+			}
+		} 	
+		else{
+
+			char message [50];
+			sprintf	(message, "(%s) usage error : type mismatch", p->opr.oper == COND_EQ ? "==" : "!=" );
+			yyerror(message);
 		}
 	}
+
 	// Check for < <= > >=
 	else if( p->opr.oper == '<' || p->opr.oper == '>' || p->opr.oper == COND_GREQ 
 	|| p->opr.oper == COND_LSEQ ){
-		// Check types equal and are numbers
-		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat)){
-			p->retType = p->opr.op[0]->retType;
+		// Check types equal
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+
+			// Check types are integer or float
+			if(p->opr.op[1]->retType == typeint || p->opr.op[1]->retType == typefloat){
+				p->retType = typebool;
+			}else{
+				char message [50];
+				sprintf	(message, "(%s) usage error :  unallowed types", p->opr.oper == '<' ? "<" : (p->opr.oper=='>' ? ">" : (p->opr.oper == COND_GREQ ? ">=" : "<=" )));
+				yyerror(message);
+			}
+
 		}else{
-			printf("\n< > <= >= error\n");
+			char message [50];
+			sprintf	(message, "(%s) usage error : type mismatch",  p->opr.oper == '<' ? "<" : (p->opr.oper=='>' ? ">" : (p->opr.oper == COND_GREQ ? ">=" : "<=" )));
+			yyerror(message);
 		}
 	}
+
 	// Check for & |
 	else if( p->opr.oper == '|' || p->opr.oper == '&'){
-		// Check types are equal and booleans
-		if((p->opr.op[0]->retType == p->opr.op[1]->retType) && (p->opr.op[1]->retType == typebool)){
-			p->retType = typebool;
+		// Check types are equal
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+			// Check type is boolean
+			if(p->opr.op[1]->retType == typebool){
+				p->retType = typebool;
+			}else{
+				char message [50];
+				sprintf	(message, "(%c) usage error :  unallowed types", p->opr.oper);
+				yyerror(message);
+			}
 		}else{
-			printf("\n| & error\n");
+			char message [50];
+			sprintf	(message, "(%c) usage error : type mismatch", p->opr.oper);
+			yyerror(message);
 		}
 	}
+
 	// CHeck for ~
 	else if (p->opr.oper == '~'){
+		// Check type is integer or float
 		if(p->opr.op[0]-> retType == typeint || p->opr.op[0]-> retType == typefloat){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\n~ error\n");
+			char message [50];
+			sprintf	(message, "(%c) usage error : unallowed type", p->opr.oper);
+			yyerror(message);
 		}
 	}
-	//Check for = (Assignment)
+
+	// Check for = (Assignment)
 	else if (p->opr.oper == '='){	
 		struct Symbol* symbol = symLookup(p->opr.op[0]->id.symTablePtr, p->opr.op[0]->id.label );
 		// Check types are equal and LHS is variable
-		if( (p->opr.op[0]->retType == p->opr.op[1]->retType) &&
-		symbol->type == variable){
-			p->retType = p->opr.op[0]->retType;
+		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
+			if(symbol->type == variable){
+				p->retType = p->opr.op[0]->retType;
+			}else{
+				char message [50];
+				sprintf	(message, "(=) usage error : attempt to change constant \"%s\"", p->opr.op[0]->id.label);
+				yyerror(message);
+			}
 		}else{
-			printf("\nassignment error\n");
-
+			yyerror("(=) usage error : type mismatch");
 		}
 	}
+
 	// Check for constnt initialization
 	else if( p->opr.oper == CONST){
 		// Check types are equal
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\nconstant init error\n");
+			char message [50];
+			sprintf	(message, "(=) usage error : type mismatch");
+			yyerror(message);
 
 		}
 	}
@@ -479,7 +554,7 @@ void oprSemanticChecks( nodeType* p){
 		if( (p->opr.op[0]->retType == p->opr.op[1]->retType)){
 			p->retType = p->opr.op[0]->retType;
 		}else{
-			printf("\ncases types not equal\n");
+			yyerror("\ncases types not equal");
 		}
 	}
 	// Check for SWITCH : expr type is same as inner expressions
@@ -487,13 +562,36 @@ void oprSemanticChecks( nodeType* p){
 		if(p->opr.op[0]->retType == p->opr.op[1]->retType){
 			p->retType = typevoid;
 		}else{
-			printf("\nswitch and cases types not equal\n");
+			yyerror("\nswitch and cases types not equal");
 		}
 	}	
+
+	// Check for FOR/WHILE: condition return type is boolean
+	else if(p->opr.oper == IF || p->opr.oper == WHILE){
+		if(p->opr.op[0]->retType == typebool ){
+			p->retType = typevoid;
+		}else{
+			char message [50];
+			sprintf	(message, "(%s) usage error : inner expression doesn't return boolean", p->opr.oper == IF ? "if" : "while");
+			yyerror(message);
+		}
+	}
+
+	// Check for doWhile: condition return type is boolean
+	else if(p->opr.oper ==DO || p->opr.oper ==FOR){
+		if(p->opr.op[1]->retType == typebool ){
+			p->retType = typevoid;
+		}else{
+			char message [50];
+			sprintf	(message, "(%s) usage error : inner expression doesn't return boolean", p->opr.oper==DO ? "do while" : "for");
+			yyerror(message);
+		}
+	}
+
 	else{
 		p->retType = typevoid;
 	}
-
+	
 }
 
 
